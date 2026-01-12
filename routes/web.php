@@ -53,3 +53,29 @@ Route::middleware(['auth','role:user'])->group(function(){
     Route::get('/user', [UserController::class,'dashboard'])->name('user.dashboard');
 });
 
+// Route pour se déconnecter
+Route::post('/logout', [LoginController::class,'logout'])->name('logout')->middleware('auth');
+
+// Route pour Home (après login)
+Route::get('/home', function () {
+    return view('home'); // Crée resources/views/home.blade.php
+})->name('home')->middleware('auth');
+
+// =======================
+// Routes protégées par rôle
+// =======================
+
+// Admin
+Route::middleware(['auth','role:admin'])->group(function(){
+    Route::get('/admin', [AdminController::class,'dashboard'])->name('admin.dashboard');
+});
+
+// Manager
+Route::middleware(['auth','role:manager'])->group(function(){
+    Route::get('/manager', [ManagerController::class,'dashboard'])->name('manager.dashboard');
+});
+
+// Utilisateur normal
+Route::middleware(['auth','role:user'])->group(function(){
+    Route::get('/user', [UserController::class,'dashboard'])->name('user.dashboard');
+});
