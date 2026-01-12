@@ -16,7 +16,11 @@ class User extends Authenticatable
      * The attributes that are mass assignable.
      *
      * @var list<string>
-     */
+     * 
+     */protected $attributes = [
+    'role' => 'user',  // rôle par défaut si non défini
+    ];
+
     protected $fillable = [
         'name',
         'email',
