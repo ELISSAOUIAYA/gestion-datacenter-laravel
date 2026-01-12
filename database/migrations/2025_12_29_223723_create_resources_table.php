@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('os')->nullable();        // Système d'exploitation
             $table->string('location')->nullable();  // Emplacement
         
-            $table->enum('status', ['disponible', 'maintenance', 'occupé', 'désactivé'])->default('disponible');
+            $table->enum('status', ['available', 'maintenance', 'occupied'])->default('available');
             $table->timestamps();
         });
     }
