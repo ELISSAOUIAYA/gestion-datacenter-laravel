@@ -10,33 +10,56 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
-    // Lister toutes les réservations pour l'utilisateur connecté
+    // Lister les réservations de l'utilisateur connecté
     public function index()
     {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
         $user = Auth::user(); 
-        // Récupère les réservations de l'utilisateur avec le nom de la ressource
         $reservations = $user->reservations()->with('resource')->get();
-        return response()->json($reservations);
+        
+        return view('reservations.index', compact('reservations'));
     }
 
-    // Formulaire création (uniquement les ressources qui sont actives/disponibles)
-    public function create()
+    // Afficher le formulaire de réservation
+    public function create(Request $request)
     {
-        $resources = Resource::where('status', 'actif')->get();
-        return response()->json($resources);
+        // PROTECTION : Redirige si l'utilisateur n'est pas connecté
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Vous devez être connecté pour réserver.');
+        }
+
+        $resourceId = $request->query('resource_id');
+        
+        // Cas 1 : On vient de l'accueil avec un ID précis
+        if ($resourceId) {
+            $resource = Resource::findOrFail($resourceId);
+            return view('reservations.create', compact('resource'));
+        }
+
+        // Cas 2 : On accède au formulaire sans ID (liste des ressources dispos)
+        $resources = Resource::where('status', 'available')->get();
+        return view('reservations.create', compact('resources'));
     }
 
-    // Stocker réservation
+    // Enregistrer la réservation (Le cœur du Backend)
     public function store(Request $request)
     {
+        // SÉCURITÉ : Protection de la méthode POST
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
         // 1. Validation des données entrantes
         $request->validate([
             'resource_id' => 'required|exists:resources,id',
-            'start_date'  => 'required|date|after_or_equal:today',
-            'end_date'    => 'required|date|after_or_equal:start_date',
+            'start_date'  => 'required|date|after_or_equal:now',
+            'end_date'    => 'required|date|after:start_date',
         ]);
 
-        // 2. Vérification de la disponibilité (Éviter les chevauchements)
+        // 2. Vérification du chevauchement (Disponibilité réelle)
         $isTaken = Reservation::where('resource_id', $request->resource_id)
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
@@ -45,9 +68,7 @@ class ReservationController extends Controller
             ->exists();
 
         if ($isTaken) {
-            return response()->json([
-                'error' => 'Cette ressource est déjà réservée pour les dates sélectionnées.'
-            ], 422);
+            return back()->withErrors(['error' => 'Cette ressource est déjà réservée pour ces dates.']);
         }
 
         // 3. Création de la réservation
@@ -56,48 +77,43 @@ class ReservationController extends Controller
             'resource_id' => $request->resource_id,
             'start_date'  => $request->start_date,
             'end_date'    => $request->end_date,
-            'status'      => 'pending', // On utilise le statut de ton ENUM
+            'status'      => 'pending', 
         ]);
 
-        return response()->json([
-            'message' => 'Réservation effectuée avec succès',
-            'data' => $reservation
-        ], 201);
+        // 4. Logique Métier : On marque la ressource comme occupée
+        $resource = Resource::find($request->resource_id);
+        $resource->update(['status' => 'occupied']);
+
+        return redirect()->route('welcome')->with('success', 'Réservation effectuée avec succès !');
     }
 
-    // Afficher les détails d'une réservation précise
     public function show(Reservation $reservation)
     {
-        // On charge les relations pour avoir les noms au lieu des simples ID
-        return response()->json($reservation->load('user', 'resource'));
+        return view('reservations.show', ['reservation' => $reservation->load('user', 'resource')]);
     }
 
-    // Formulaire édition
-    public function edit(Reservation $reservation)
-    {
-        return response()->json($reservation);
-    }
-
-    // Mettre à jour (utile pour l'admin ou le manager pour changer le statut)
     public function update(Request $request, Reservation $reservation)
     {
         $request->validate([
-            'start_date' => 'sometimes|required|date',
-            'end_date'   => 'sometimes|required|date|after_or_equal:start_date',
-            'status'     => 'sometimes|in:pending,approved,rejected', // Liste de ton ENUM
+            'status' => 'sometimes|in:pending,approved,rejected',
         ]);
 
         $reservation->update($request->all());
-        return response()->json([
-            'message' => 'Réservation mise à jour',
-            'data' => $reservation
-        ]);
+
+        // Si rejetée, on libère la ressource immédiatement
+        if($request->status == 'rejected') {
+            $reservation->resource->update(['status' => 'available']);
+        }
+
+        return back()->with('success', 'Réservation mise à jour.');
     }
 
-    // Supprimer
     public function destroy(Reservation $reservation)
     {
+        // Libération de la ressource avant suppression
+        $reservation->resource->update(['status' => 'available']);
         $reservation->delete();
-        return response()->json(['message' => 'Réservation annulée avec succès']);
+        
+        return redirect()->route('welcome')->with('success', 'Réservation annulée et ressource libérée.');
     }
 }

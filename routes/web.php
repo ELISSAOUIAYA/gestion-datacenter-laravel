@@ -12,27 +12,14 @@ use App\Http\Controllers\IncidentController;
 use App\Models\Reservation;
 use App\Models\Resource; 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// Page d'accueil : Affiche les réservations existantes ET les ressources disponibles
+// Page d'accueil : Publique
 Route::get('/', function () {
-    // Récupère les réservations avec relations pour le tableau de test
     $reservations = Reservation::with(['user', 'resource'])->get();
-    
-    // CORRECTION ICI : On cherche 'available' et non 'actif'
-    // On récupère toutes les ressources disponibles pour l'affichage
     $resources = Resource::where('status', 'available')->get(); 
-    
     return view('welcome', compact('reservations', 'resources')); 
 })->name('welcome');
 
-// =======================
-// Routes pour les invités (guest)
-// =======================
+// Authentification pour les Invités
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class,'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class,'register']);
@@ -40,40 +27,38 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class,'login']);
 });
 
-// =======================
-// Route pour se déconnecter
-// =======================
-Route::post('/logout', [LoginController::class,'logout'])->name('logout')->middleware('auth');
+// =========================================================
+// ROUTES PROTÉGÉES (Connexion Requise)
+// =========================================================
+Route::middleware(['auth'])->group(function () {
 
-// =======================
-// Route pour Home (après login)
-// =======================
-Route::get('/home', function () {
-    return view('home'); 
-})->name('home')->middleware('auth');
+    Route::post('/logout', [LoginController::class,'logout'])->name('logout');
+    Route::redirect('/home', '/');
 
-// =======================
-// Routes protégées par rôle
-// =======================
+    // --- LOGIQUE DE RÉSERVATION PARTAGÉE ---
+    // Tout utilisateur connecté peut accéder au formulaire et stocker
+    Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
+    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 
-// Admin : Accès complet à toutes les ressources
-Route::middleware(['auth', 'role:admin'])->group(function(){
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::resource('resources', ResourceController::class);
-    Route::resource('reservations', ReservationController::class);
-    Route::resource('incidents', IncidentController::class);
-});
+    // Admin : Gestion totale
+    Route::middleware(['role:admin'])->group(function(){
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::resource('resources', ResourceController::class);
+        Route::resource('incidents', IncidentController::class);
+        Route::resource('reservations', ReservationController::class)->except(['create', 'store']);
+    });
 
-// Manager : Consultation et gestion partielle
-Route::middleware(['auth', 'role:manager'])->group(function(){
-    Route::get('/manager/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
-    Route::resource('resources', ResourceController::class)->only(['index', 'show']);
-    Route::resource('reservations', ReservationController::class)->only(['index', 'show']);
-    Route::resource('incidents', IncidentController::class)->only(['index', 'show']);
-});
+    // Manager : Consultation
+    Route::middleware(['role:manager'])->group(function(){
+        Route::get('/manager/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
+        Route::resource('resources', ResourceController::class)->only(['index', 'show']);
+        Route::resource('incidents', IncidentController::class)->only(['index', 'show']);
+        Route::resource('reservations', ReservationController::class)->only(['index', 'show']);
+    });
 
-// Utilisateur normal : Peut voir et créer ses réservations
-Route::middleware(['auth', 'role:user'])->group(function(){
-    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
-    Route::resource('reservations', ReservationController::class)->only(['index', 'create', 'store']);
+    // User : Dashboard personnel
+    Route::middleware(['role:user'])->group(function(){
+        Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+        Route::resource('reservations', ReservationController::class)->only(['index', 'show'])->except(['create', 'store']);
+    });
 });
