@@ -7,79 +7,80 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Resource;
+use App\Models\ResourceCategory;
+use Illuminate\Support\Facades\Hash;
 
 class DataCenterSeeder extends Seeder
 {
     public function run(): void
     {
-    // 1. Création des Rôles (Pour les utilisateurs authentifiés)
+        // 0. NETTOYAGE (Évite les erreurs de clés étrangères)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Role::truncate();
+        User::truncate();
+        Resource::truncate();
+        ResourceCategory::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // 1. CRÉATION DES RÔLES (Sans la colonne 'description' qui cause l'erreur)
         $adminRole = Role::create(['name' => 'Admin']);
         $techRole  = Role::create(['name' => 'Responsable Technique']);
         $userRole  = Role::create(['name' => 'Utilisateur Interne']);
 
+        // 2. CRÉATION DES CATÉGORIES
+        $catSrv = ResourceCategory::create(['name' => 'Serveur']);
+        $catVM  = ResourceCategory::create(['name' => 'VM']);
+        $catSto = ResourceCategory::create(['name' => 'Stockage']);
+        $catNet = ResourceCategory::create(['name' => 'Réseau']);
 
-    // 2. Création des Catégories de ressources
-    \DB::table('resource_categories')->insert([
-        ['name' => 'Serveurs Physiques'],
-        ['name' => 'Machines Virtuelles (VM)'],
-        ['name' => 'Stockage Cloud'],
-    ]);
+        $categories = [$catSrv, $catVM, $catSto, $catNet];
 
-    // 3. Ajout de plusieurs ressources de test
-    \App\Models\Resource::create([
-        'name' => 'Dell-PowerEdge-R740',
-        'type' => 'Serveur',
-        'cpu' => '48 Cores',
-        'ram' => '256 Go',
-        'capacity' => '4 TB',
-        'os' => 'VMware ESXi',
-        'status' => 'available'
-    ]);
+        // 3. CRÉATION DES UTILISATEURS
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@test.com',
+            'password' => Hash::make('admin123'),
+            'role_id' => $adminRole->id,
+            'status' => 'active'
+        ]);
 
-    \App\Models\Resource::create([
-        'name' => 'SRV-WEB-PROD',
-        'type' => 'VM',
-        'cpu' => '8 Cores',
-        'ram' => '32 Go',
-        'capacity' => '500 GB',
-        'os' => 'Ubuntu 22.04',
-        'status' => 'available'
-    ]);
+        User::create([
+            'name' => 'Responsable technique',
+            'email' => 'tech@test.com',
+            'password' => Hash::make('tech123'),
+            'role_id' => $techRole->id,
+            'status' => 'active'
+        ]);
 
-    \App\Models\Resource::create([
-        'name' => 'NAS-Backup-01',
-        'type' => 'Stockage',
-        'cpu' => 'N/A',
-        'ram' => '16 Go',
-        'capacity' => '20 TB',
-        'os' => 'TrueNAS',
-        'status' => 'maintenance'
-    ]);
-
-    // 4. Création des utilisateurs liés aux rôles
-    \App\Models\User::create([
-        'name' => 'Admin ',
-        'email' => 'admin@test.com',
-        'password' => bcrypt('admin123'),
-        'role_id' => $adminRole->id,
-        'status' => 'active'
-    ]);
-
-    \App\Models\User::create([
-        'name' => 'Responsable Technique',
-        'email' => 'tech@test.com',
-        'password' => bcrypt('tech123'),
-        'role_id' => $techRole->id,
-        'status' => 'active'
-    ]);
-    // 4. Création d'un Utilisateur Interne (Enseignant/Chercheur)
         User::create([
             'name' => 'Utilisateur Interne',
-            'email' => 'user@datacenter.com',
-            'password' => bcrypt('user123'),
+            'email' => 'user@test.com',
+            'password' => Hash::make('user123'),
             'role_id' => $userRole->id,
             'status' => 'active'
         ]);
 
+        // 4. GÉNÉRATION DES 50 RESSOURCES (Correction de l'erreur SQL 'type')
+        $models = [
+            'Serveur' => ['Dell PowerEdge', 'HP ProLiant'],
+            'VM' => ['Ubuntu Server', 'Windows Core'],
+            'Stockage' => ['NetApp SAN', 'Synology NAS'],
+            'Réseau' => ['Cisco Switch', 'Juniper Router']
+        ];
+
+        for ($i = 1; $i <= 50; $i++) {
+            $catObj = $categories[array_rand($categories)];
+            
+            Resource::create([
+                'name' => "Equipement-IT-" . $i,
+                'resource_category_id' => $catObj->id, // On utilise l'ID, pas 'type'
+                'cpu' => rand(4, 32) . " Cores",
+                'ram' => rand(8, 128) . " Go",
+                'capacity' => rand(100, 2000) . " Go",
+                'os' => (rand(0, 1) ? 'Linux' : 'Windows'),
+                'location' => 'Rack-' . rand(1, 20),
+                'status' => 'available'
+            ]);
+        }
     }
 }

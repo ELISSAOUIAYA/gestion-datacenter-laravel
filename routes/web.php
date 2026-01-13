@@ -6,67 +6,89 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TechController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\ResourceController; 
+use App\Http\Controllers\ReservationController; 
+use App\Http\Controllers\IncidentController;    
+use App\Models\Reservation;
+use App\Models\Resource;
 
 /*
 |--------------------------------------------------------------------------
-| 1. ROUTES PUBLIQUES (Accessibles à l'INVITÉ)
+| 1. ROUTES PUBLIQUES
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil (Landing Page) visible par tous dès l'arrivée
 Route::get('/', function () {
-    return view('welcome'); 
+    $reservations = Reservation::with(['user', 'resource'])->get();
+    $resources = Resource::where('status', 'available')->get(); 
+    return view('welcome', compact('reservations', 'resources')); 
 })->name('welcome');
 
-// Catalogue des ressources (Lecture seule pour l'invité - Règle n°1 du sujet)
-Route::get('/resources', [ResourceController::class, 'index'])->name('resources.index');
-
-
-/*
-|--------------------------------------------------------------------------
-| 2. AUTHENTIFICATION (Login / Inscription)
-|--------------------------------------------------------------------------
-*/
-
+// Authentification
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
 });
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [LoginController::class,'logout'])->name('logout')->middleware('auth');
 
+Route::get('/home', function () {
+    return view('home'); 
+})->name('home')->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
-| 3. ROUTES PROTÉGÉES PAR RÔLES (Connexion obligatoire)
+| 2. ROUTES PROTÉGÉES (COMMUNES)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth'])->group(function () {
-
-    // Redirection de secours
-    Route::get('/home', function () {
-        return view('home'); 
-    })->name('home');
-
-    // --- TYPE 4 : ADMINISTRATEUR ---
-    Route::middleware(['role:Admin'])->group(function () {
-        Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
-    });
-
-    // --- TYPE 3 : RESPONSABLE TECHNIQUE ---
-    Route::middleware(['auth', 'role:Responsable Technique'])->group(function () {
-    Route::get('/responsable/dashboard', [TechController::class, 'dashboard'])->name('tech.dashboard');
-    });
+    // Formulaire de réservation (Chorouk)
+    Route::get('/reservations/create/{resource}', [ReservationController::class, 'create'])->name('reservations.create');
+    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
     
-    // --- TYPE 2 : UTILISATEUR INTERNE ---
-    Route::middleware(['role:Utilisateur Interne'])->group(function () {
-        Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
-    });
+    // Signalement d'incident (Accessible par Utilisateur et Tech)
+    Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
+    Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
+});
 
+/*
+|--------------------------------------------------------------------------
+| 3. DASHBOARD ADMINISTRATEUR
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
+    Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle');
+    Route::patch('/admin/resources/{resource}/maintenance', [AdminController::class, 'toggleMaintenance'])->name('admin.resources.maintenance');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 4. DASHBOARD RESPONSABLE TECHNIQUE
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:Responsable Technique'])->group(function(){
+    Route::get('/responsable/dashboard', [TechController::class, 'dashboard'])->name('tech.dashboard');
+    Route::put('/reservations/{reservation}/update', [ReservationController::class, 'update'])->name('reservations.update');
+    
+    // Ressources CRUD pour le Tech
+    Route::resource('resources', ResourceController::class)->only(['index', 'show']);
+    Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| 5. DASHBOARD UTILISATEUR INTERNE (Ingénieur / Enseignant / Doctorant)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:Utilisateur Interne'])->group(function () {
+    // On utilise UserController@dashboard pour l'historique et les filtres
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });

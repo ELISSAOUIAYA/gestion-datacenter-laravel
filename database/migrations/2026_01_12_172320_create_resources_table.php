@@ -13,18 +13,25 @@ return new class extends Migration
     {
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Nom de la ressource
-            $table->enum('type', ['Serveur', 'VM', 'Stockage', 'Réseau']); // Type demandé
-        
-            // Caractéristiques techniques (selon tes captures)
+            $table->string('name'); // Nom de la ressource (ex: Dell PowerEdge #1)
+
+            // REMPLACEMENT : On utilise une clé étrangère vers la table resource_categories
+            // Assure-toi que la migration de 'resource_categories' a une date antérieure à celle-ci
+            $table->foreignId('resource_category_id')
+                  ->constrained('resource_categories')
+                  ->onDelete('cascade');
+
+            // Caractéristiques techniques
             $table->string('cpu')->nullable();
             $table->string('ram')->nullable();
             $table->string('bandwidth')->nullable(); // Bande passante
             $table->string('capacity')->nullable();  // Capacité stockage
             $table->string('os')->nullable();        // Système d'exploitation
-            $table->string('location')->nullable();  // Emplacement
-        
+            $table->string('location')->nullable();  // Emplacement (Salle/Rack)
+
+            // Statut de la ressource
             $table->enum('status', ['available', 'maintenance', 'occupied'])->default('available');
+            
             $table->timestamps();
         });
     }
