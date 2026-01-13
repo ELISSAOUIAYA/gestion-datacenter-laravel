@@ -1,77 +1,63 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+    <title>Créer un compte | DataCenter</title>
+</head>
+<body>
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
+<div class="register-container">
+    <div class="register-box">
+        <div class="header-zone">
+            <i class='bx bxs-user-plus icon-main'></i>
+            <h2>Rejoignez-nous</h2>
+            <p>Créez votre accès au DataCenter en quelques secondes</p>
+        </div>
 
-                <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
-
-                        <div class="row mb-3">
-                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
-
-                                @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+        <form method="POST" action="{{ route('register') }}" id="regForm">
+            @csrf
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Nom complet</label>
+                    <input type="text" name="name" class="form-control" placeholder="Ali Alami" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Email Professionnel</label>
+                    <input type="email" name="email" class="form-control" placeholder="ali@company.com" required>
                 </div>
             </div>
-        </div>
+
+            <div class="mb-3">
+                <label>Mot de passe</label>
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="pass" class="form-control" required>
+                    <i class='bx bx-hide toggle-pass' onclick="toggle('pass')"></i>
+                </div>
+                <div class="pass-strength mt-2">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label>Confirmer le mot de passe</label>
+                <div class="input-wrapper">
+                    <input type="password" name="password_confirmation" id="pass_confirm" class="form-control" required>
+                    <i class='bx bx-hide toggle-pass' onclick="toggle('pass_confirm')"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="submitBtn">
+                Créer mon compte
+            </button>
+
+            <p class="text-center mt-3 mb-0">Déjà inscrit ? <a href="{{ route('login') }}" class="text-primary fw-bold">Se connecter</a></p>
+        </form>
     </div>
 </div>
-@endsection
+
+<script src="{{ asset('js/register.js') }}"></script>
+</body>
+</html>
