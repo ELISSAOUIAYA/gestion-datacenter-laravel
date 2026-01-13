@@ -9,7 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\IncidentController;
-use App\Models\Reservation; // <-- AJOUTÉ pour le test
+use App\Models\Reservation;
+use App\Models\Resource; 
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +18,16 @@ use App\Models\Reservation; // <-- AJOUTÉ pour le test
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil : modifiée pour afficher les réservations existantes
+// Page d'accueil : Affiche les réservations existantes ET les ressources disponibles
 Route::get('/', function () {
-    // On récupère les réservations avec les relations pour éviter les erreurs "null"
+    // Récupère les réservations avec relations pour le tableau de test
     $reservations = Reservation::with(['user', 'resource'])->get();
     
-    return view('welcome', compact('reservations')); 
+    // CORRECTION ICI : On cherche 'available' et non 'actif'
+    // On récupère toutes les ressources disponibles pour l'affichage
+    $resources = Resource::where('status', 'available')->get(); 
+    
+    return view('welcome', compact('reservations', 'resources')); 
 })->name('welcome');
 
 // =======================
@@ -51,24 +56,24 @@ Route::get('/home', function () {
 // Routes protégées par rôle
 // =======================
 
-// Admin
-Route::middleware(['auth','role:admin'])->group(function(){
-    Route::get('/admin/dashboard', [AdminController::class,'dashboard'])->name('admin.dashboard');
+// Admin : Accès complet à toutes les ressources
+Route::middleware(['auth', 'role:admin'])->group(function(){
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::resource('resources', ResourceController::class);
     Route::resource('reservations', ReservationController::class);
     Route::resource('incidents', IncidentController::class);
 });
 
-// Manager
-Route::middleware(['auth','role:manager'])->group(function(){
-    Route::get('/manager/dashboard', [ManagerController::class,'dashboard'])->name('manager.dashboard');
+// Manager : Consultation et gestion partielle
+Route::middleware(['auth', 'role:manager'])->group(function(){
+    Route::get('/manager/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
     Route::resource('resources', ResourceController::class)->only(['index', 'show']);
     Route::resource('reservations', ReservationController::class)->only(['index', 'show']);
     Route::resource('incidents', IncidentController::class)->only(['index', 'show']);
 });
 
-// Utilisateur normal
-Route::middleware(['auth','role:user'])->group(function(){
-    Route::get('/user/dashboard', [UserController::class,'dashboard'])->name('user.dashboard');
-    Route::resource('reservations', ReservationController::class)->only(['index','create','store']);
+// Utilisateur normal : Peut voir et créer ses réservations
+Route::middleware(['auth', 'role:user'])->group(function(){
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::resource('reservations', ReservationController::class)->only(['index', 'create', 'store']);
 });
