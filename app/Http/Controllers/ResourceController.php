@@ -12,7 +12,7 @@ class ResourceController extends Controller
         // On récupère toutes les lignes de ta table 'resources'
         $serveurs = Resource::all(); 
         
-        // On les envoie à une page nommée 'test_view'
-        return view('test_view', compact('serveurs'));
+ 
+       return view('resources.index', ['resources' => $serveurs]);
     }
 }

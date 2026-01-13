@@ -12,9 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // زيد هاد السطر هنا:
+       
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class, // تأكد بلي هاد الملف عندك
+            'role' => \App\Http\Middleware\RoleMiddleware::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

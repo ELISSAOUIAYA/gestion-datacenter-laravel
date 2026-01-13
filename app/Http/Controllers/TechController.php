@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class ManagerController extends Controller
+class TechController extends Controller 
 {
     public function dashboard()
     {
-        return view('manager.dashboard'); // créer cette vue
+        return view('responsable.dashboard'); 
     }
 }

@@ -14,10 +14,9 @@ class RoleMiddleware
             return redirect('/login');
         }
 
-        if (Auth::user()->role !== $role) {
-            abort(403, "Accès interdit");
+        if (Auth::user()->role->name !== $role) {
+        abort(403, "Accès interdit");
         }
-
         return $next($request);
     }
 }

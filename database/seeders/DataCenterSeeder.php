@@ -2,18 +2,21 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Resource;
 
 class DataCenterSeeder extends Seeder
 {
-    public function run(): void{
+    public function run(): void
+    {
+    // 1. Création des Rôles (Pour les utilisateurs authentifiés)
+        $adminRole = Role::create(['name' => 'Admin']);
+        $techRole  = Role::create(['name' => 'Responsable Technique']);
+        $userRole  = Role::create(['name' => 'Utilisateur Interne']);
 
-    // 1. Création des Rôles (incluant le Manager)
-    $adminId = \DB::table('roles')->insertGetId(['name' => 'Admin']);
-    $managerId = \DB::table('roles')->insertGetId(['name' => 'Manager']);
-    $techId = \DB::table('roles')->insertGetId(['name' => 'Responsable Technique']);
-    $userId = \DB::table('roles')->insertGetId(['name' => 'Utilisateur Interne']);
 
     // 2. Création des Catégories de ressources
     \DB::table('resource_categories')->insert([
@@ -55,20 +58,28 @@ class DataCenterSeeder extends Seeder
 
     // 4. Création des utilisateurs liés aux rôles
     \App\Models\User::create([
-        'name' => 'Admin Test',
+        'name' => 'Admin ',
         'email' => 'admin@test.com',
         'password' => bcrypt('admin123'),
-        'role_id' => $adminId,
+        'role_id' => $adminRole->id,
         'status' => 'active'
     ]);
 
     \App\Models\User::create([
-        'name' => 'Manager Test',
-        'email' => 'manager@test.com',
-        'password' => bcrypt('manager123'),
-        'role_id' => $managerId,
+        'name' => 'Responsable Technique',
+        'email' => 'tech@test.com',
+        'password' => bcrypt('tech123'),
+        'role_id' => $techRole->id,
         'status' => 'active'
     ]);
-}
+    // 4. Création d'un Utilisateur Interne (Enseignant/Chercheur)
+        User::create([
+            'name' => 'Utilisateur Interne',
+            'email' => 'user@datacenter.com',
+            'password' => bcrypt('user123'),
+            'role_id' => $userRole->id,
+            'status' => 'active'
+        ]);
+
     }
-?>
+}
