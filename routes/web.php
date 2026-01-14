@@ -11,6 +11,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\IncidentController;    
 use App\Models\Reservation;
 use App\Models\Resource;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,11 @@ Route::middleware(['auth'])->group(function () {
     // --- LOGIQUE D'INCIDENTS ---
     Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
+    Route::delete('/reservations/{reservation}/delete', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::post('/mark-notifications-read', function () {
+    Auth::user()->notifications()->where('is_read', false)->update(['is_read' => true]);
+    return response()->json(['success' => true]);
+    })->name('notifications.markRead');
 
     /*
     |--------------------------------------------------------------------------

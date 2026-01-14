@@ -10,7 +10,34 @@
     .table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #666; }
     .table td { padding: 12px; border-top: 1px solid #eee; vertical-align: middle; }
     .btn-toggle { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; color: white; font-size: 11px; }
+    .btn-logout {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-logout:hover {
+    background-color: #c0392b;
+}
 </style>
+
+
+<form action="{{ route('logout') }}" method="POST" style="display: inline;">
+    @csrf
+    <button type="submit" class="btn-logout">
+        <i class='bx bx-log-out'></i> Déconnexion
+    </button>
+</form>
+
 
 <div class="admin-body">
     <h1><i class='bx bxs-shield-quarter'></i> Administration Globale</h1>

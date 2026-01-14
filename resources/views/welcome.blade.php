@@ -144,6 +144,12 @@
     font-size: 0.7rem; 
     opacity: 0.6; 
 }
+.notif-badge {
+    transition: opacity 0.3s ease;
+}
+.notif-item.unread {
+    background-color: #f0f7ff; /* Un léger bleu pour les messages non lus */
+}
 
         /* Hero Section */
         .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') no-repeat center/cover;
@@ -305,6 +311,37 @@
                 </table>
             </div>
         </section>
+        <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notifBtn = document.getElementById('notifBtn');
+    
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function() {
+            // 1. Envoyer la requête au serveur
+            fetch("{{ route('notifications.markRead') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 2. Cacher le badge rouge visuellement
+                    const badge = document.querySelector('.notif-badge');
+                    if (badge) badge.style.display = 'none';
+                    
+                    // 3. Mettre à jour le texte "X nouveaux" en "0 nouveaux"
+                    const counterText = document.querySelector('.notif-header small');
+                    if (counterText) counterText.textContent = '0 nouveaux';
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+    }
+});
+</script>
     </main>
 
     <button id="theme-toggle" class="theme-toggle btn">

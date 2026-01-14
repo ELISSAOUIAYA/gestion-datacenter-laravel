@@ -15,21 +15,9 @@
                 <table class="table table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th>
-                                <a href="?sort=start_date&order={{ request('order') == 'asc' ? 'desc' : 'asc' }}" class="text-white text-decoration-none">
-                                    Période <i class='bx bx-sort'></i>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?sort=resource_id&order={{ request('order') == 'asc' ? 'desc' : 'asc' }}" class="text-white text-decoration-none">
-                                    Ressource <i class='bx bx-laptop'></i>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?sort=status&order={{ request('order') == 'asc' ? 'desc' : 'asc' }}" class="text-white text-decoration-none">
-                                    Statut <i class='bx bx-info-circle'></i>
-                                </a>
-                            </th>
+                            <th>Période</th>
+                            <th>Ressource</th>
+                            <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -44,18 +32,24 @@
                                     <strong>{{ $reservation->resource->name }}</strong>
                                 </td>
                                 <td>
-                                    @if($reservation->status == 'validée')
-                                        <span class="badge bg-success">Validée</span>
-                                    @elseif($reservation->status == 'en_attente')
-                                        <span class="badge bg-warning text-dark">En attente</span>
-                                    @else
-                                        <span class="badge bg-danger">Refusée</span>
-                                    @endif
+                               @if($reservation->status == 'pending')
+                            <span class="status-badge bg-pending">EN ATTENTE</span>
+                             @elseif($reservation->status == 'approved')
+                             <span class="status-badge bg-approved" style="background-color: #2ecc71; color: white; padding: 5px 10px; border-radius: 4px;">Validée</span>
+                        @elseif($reservation->status == 'rejected')
+                              <span class="status-badge bg-rejected" style="background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px;">Refusée</span>
+                            @endif
+                              </td>
+                               <td>
+                            <form action="{{ route('reservations.destroy', $reservation->id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer cette opération de votre historique ?');">
+                                 @csrf
+                                     @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" style="background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                    <i class='bx bx-trash'></i> Supprimer
+                                     </button>
+                                     </form>
                                 </td>
-                                <td>
-                                    {{-- Ajoute ici un bouton si tu veux permettre d'annuler une réservation en attente --}}
-                                    <button class="btn btn-sm btn-outline-primary"><i class='bx bx-show'></i> Détails</button>
-                                </td>
+   
                             </tr>
                         @empty
                             <tr>

@@ -102,6 +102,15 @@
             </form>
         </div>
     </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Mes Réservations</h1>
+    <a href="{{ route('user.historique') }}" class="btn btn-info" style="background-color: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+        <i class='bx bx-history'></i> Voir mon Historique
+    </a>
+
+
+    
+     </div>
 
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

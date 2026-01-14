@@ -84,8 +84,14 @@ class ReservationController extends Controller
     return back()->with('success', 'Statut mis à jour et utilisateur notifié.');
 }
     public function destroy(Reservation $reservation)
-    {
-        $reservation->delete();
-        return back()->with('success', 'Réservation annulée.');
+{
+
+    if ($reservation->status === 'approved' || $reservation->status === 'pending') {
+        $reservation->resource->update(['status' => 'available']);
     }
+
+    $reservation->delete();
+
+    return back()->with('success', 'L\'opération a été supprimée et la ressource libérée.');
+}
 }

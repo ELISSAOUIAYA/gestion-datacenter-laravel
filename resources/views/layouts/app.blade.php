@@ -50,22 +50,24 @@
                 <i class='bx bxs-dashboard me-2'></i> Dashboard
             </a>
         </li>
+        @auth
+    {{-- On affiche pour l'utilisateur normal --}}
+    @if(Auth::user()->role == 'Utilisateur Interne' || Auth::user()->role == 'user')
         <li class="nav-item">
-    <a href="{{ route('user.historique') }}" class="nav-link">
-        <i class='bx bx-history'></i>
-        <span class="link-name">Mon Historique</span>
-    </a>
-    </li>
+            <a class="nav-link" href="{{ route('user.historique') }}">
+                <i class='bx bx-history'></i> Historique
+            </a>
+        </li>
+    @endif
+
+    {{-- Liens pour le Responsable Technique --}}
+    @if(Auth::user()->role == 'Responsable Technique' || Auth::user()->role == 'tech')
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('tech.dashboard') }}">Dashboard Technique</a>
+        </li>
+    @endif
+@endauth
     </ul>
-    <hr class="text-secondary">
-    <div class="dropdown">
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-danger w-100 d-flex align-items-center justify-content-center">
-                <i class='bx bx-log-out-circle me-2'></i> Déconnexion
-            </button>
-        </form>
-    </div>
 </div>
 </body>
 </html>
