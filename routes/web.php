@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
         
         // Consultation incidents
         Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
+        Route::delete('/manager/incidents/{incident}', [IncidentController::class, 'destroy'])->name('manager.incidents.destroy');
     });
 
     /*

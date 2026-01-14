@@ -97,8 +97,44 @@
                         Aucune demande de réservation à traiter pour le moment.
                     </td>
                 </tr>
+                
             @endforelse
         </tbody>
     </table>
+    <section style="margin-top: 40px;">
+    <h4 style="color: var(--danger);"><i class='bx bx-error-alt'></i> Incidents Signalés (Modération)</h4>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Ressource</th>
+                    <th>Message / Problème</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($incidents as $incident)
+                <tr>
+                    <td>{{ $incident->user->name }}</td>
+                    <td><strong>{{ $incident->resource->name }}</strong></td>
+                    <td>{{ $incident->description }}</td>
+                    <td>{{ $incident->created_at->format('d/m/H:i') }}</td>
+                    <td>
+                        <form action="{{ route('incidents.destroy', $incident->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Supprimer ce message ?')">
+                                <i class='bx bx-trash'></i> Modérer
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</section>
 </div>
 @endsection

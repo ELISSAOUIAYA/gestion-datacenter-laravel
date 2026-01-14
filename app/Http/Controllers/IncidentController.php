@@ -9,12 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class IncidentController extends Controller
 {
+   
     public function index()
-    {
-        $incidents = Incident::with('resource', 'user')->get();
-        return response()->json($incidents);
-    }
-
+{
+    // On récupère les incidents avec les infos de l'utilisateur et de la ressource
+    $incidents = Incident::with(['user', 'resource'])->latest()->get();
+    return view('manager.incidents.index', compact('incidents'));
+}
+public function destroy(Incident $incident)
+{
+    $incident->delete();
+    return back()->with('success', 'Le signalement a été supprimé par la modération.');
+}
    // app/Http/Controllers/IncidentController.php
 
 public function create(Request $request)
@@ -62,9 +68,5 @@ public function create(Request $request)
         return response()->json($incident);
     }
 
-    public function destroy(Incident $incident)
-    {
-        $incident->delete();
-        return response()->json(['message' => 'Incident deleted']);
-    }
+    
 }

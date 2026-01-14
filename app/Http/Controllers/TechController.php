@@ -1,19 +1,21 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Reservation; 
+use App\Models\Reservation; // Importation nécessaire
+use App\Models\Incident;    // Importation nécessaire
 
-class TechController extends Controller 
+class TechController extends Controller
 {
-    public function dashboard()
+    public function Dashboard() 
     {
-        // 1. Récupérer toutes les réservations avec les infos du User et de la Ressource
-        // On utilise 'with' pour éviter de ralentir le serveur (Eager Loading)
-        $reservations = Reservation::with(['user', 'resource'])->latest()->get();
+        // On récupère les réservations pour le tableau du haut
+        $reservations = Reservation::with(['user', 'resource'])->latest()->get(); 
+        
+        // On récupère les incidents (messages du bouton rouge) pour la modération
+        $incidents = Incident::with(['user', 'resource'])->latest()->get(); 
 
-        // 2. Envoyer la variable à la vue
-        return view('responsable.dashboard', compact('reservations'));
+        // On envoie les deux variables à la vue
+        return view('responsable.dashboard', compact('reservations', 'incidents'));
     }
 }
