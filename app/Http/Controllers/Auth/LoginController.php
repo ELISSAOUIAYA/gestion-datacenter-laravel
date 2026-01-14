@@ -11,7 +11,20 @@ class LoginController extends Controller
     use AuthenticatesUsers;
 
     /**
+<<<<<<< HEAD
      * Cette méthode remplace la propriété $redirectTo pour une redirection dynamique.
+=======
+     * Where to redirect users after login.
+     *
+     * @var string
+     */protected $redirectTo = '/';
+
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+>>>>>>> 6b6938a87494967ca753f4467d5315b2d458f845
      */
     protected function redirectTo()
     {

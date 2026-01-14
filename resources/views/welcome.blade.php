@@ -33,7 +33,7 @@
         }
 
         /* Reset & Base */
-        * { margin: 0; padding: 0; box-box: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); transition: 0.3s; line-height: 1.6; }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
@@ -41,7 +41,7 @@
         /* Layout */
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* Navbar Custom */
+        /* Navbar */
         .navbar { background: var(--dark); color: white; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .nav-content { display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
@@ -49,13 +49,9 @@
         .nav-links { display: flex; gap: 20px; align-items: center; }
 
         /* Hero Section */
-        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') no-repeat center/cover;
+        .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') no-repeat center/cover;
                 color: white; text-align: center; padding: 80px 20px; }
         .hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        .hero p { font-size: 1.1rem; opacity: 0.8; }
-
-        /* Alerts */
-        .alert { padding: 15px; margin: 20px 0; border-radius: 8px; background: var(--success); color: white; display: flex; align-items: center; gap: 10px; }
 
         /* Tables & Sections */
         section { margin: 40px 0; }
@@ -64,29 +60,21 @@
         .table-container { background: var(--bg-card); border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: rgba(0,0,0,0.02); padding: 15px; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border-color); }
-        td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
 
         /* Status & Badges */
-        .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .bg-pending { background: var(--warning); color: #333; }
-        .bg-valid { background: var(--success); color: white; }
-        
         .status-pill { padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; }
         .status-available { background: #d4edda; color: #155724; }
         .status-occupied { background: #fff3cd; color: #856404; }
         .status-maintenance { background: #f8d7da; color: #721c24; }
 
         /* Buttons */
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-outline-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
-        .btn-outline-danger:hover { background: var(--danger); color: white; }
         .btn-success { background: var(--success); color: white; }
+        .btn-outline-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
 
-        /* Mode Sombre Toggle */
-        .theme-toggle { position: fixed; bottom: 30px; right: 30px; padding: 12px 20px; border-radius: 50px; background: var(--dark); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-
+        .theme-toggle { position: fixed; bottom: 30px; right: 30px; padding: 12px 20px; border-radius: 50px; background: var(--dark); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
         footer { text-align: center; padding: 40px; background: var(--dark); color: white; font-size: 0.8rem; margin-top: 60px; }
     </style>
 </head>
@@ -98,13 +86,14 @@
                 <i class='bx bxs-server'></i> DataCenter <span>Pro</span>
             </a>
             <ul class="nav-links">
+                <li><a href="{{ url('/') }}">Accueil</a></li>
                 @guest
                     <li><a href="{{ route('login') }}">Connexion</a></li>
                     <li><a href="{{ route('register') }}" class="btn btn-primary">Inscription</a></li>
                 @else
-                    <li><small>Utilisateur : <strong>{{ Auth::user()->name }}</strong></small></li>
+                    <li><a href="{{ route('user.dashboard') }}"><strong>Mon Dashboard</strong></a></li>
                     <li>
-                        <form action="{{ route('logout') }}" method="POST">
+                        <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" class="btn btn-outline-danger">Quitter</button>
                         </form>
@@ -117,51 +106,17 @@
     <header class="hero">
         <div class="container">
             <h1>Supervision de l'Infrastructure</h1>
-            <p>Accès en temps réel aux serveurs physiques et virtuels du Data Center.</p>
+            <p>Accès en temps réel aux ressources critiques du Data Center.</p>
         </div>
     </header>
 
     <main class="container">
         
         @if(session('success'))
-            <div class="alert">
+            <div style="background: var(--success); color: white; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <i class='bx bxs-check-circle'></i> {{ session('success') }}
             </div>
         @endif
-
-        <section>
-            <h4><i class='bx bx-time-five'></i> Flux des Réservations</h4>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Technicien</th>
-                            <th>Équipement</th>
-                            <th>Catégorie</th>
-                            <th>Statut</th>
-                            <th>Échéance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($reservations as $res)
-                            <tr>
-                                <td>{{ $res->user->name }}</td>
-                                <td><strong>{{ $res->resource->name }}</strong></td>
-                                <td>{{ $res->resource->category->name }}</td>
-                                <td>
-                                    <span class="badge {{ $res->status == 'validée' ? 'bg-valid' : 'bg-pending' }}">
-                                        {{ ucfirst($res->status) }}
-                                    </span>
-                                </td>
-                                <td>{{ \Carbon\Carbon::parse($res->end_date)->format('d/m/Y') }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">Aucune donnée active.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </section>
 
         <section id="ressources">
             <h4><i class='bx bx-hdd'></i> Inventaire des Ressources</h4>
@@ -169,25 +124,27 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nom & Localisation</th>
-                            <th>Catégorie</th>
-                            <th>Spécifications</th>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Capacité / Spécifications</th>
                             <th>État</th>
-                            <th style="text-align: center;">Demande</th>
+                            <th style="text-align: center;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($resources as $resource)
                         <tr>
+                            <td><strong>{{ $resource->name }}</strong></td>
                             <td>
-                                <strong>{{ $resource->name }}</strong><br>
-                                <small style="color: var(--text-muted);">{{ $resource->location ?? 'Site Principal' }}</small>
+                                <span style="color: var(--primary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">
+                                    {{ $resource->type ?? 'Serveur' }}
+                                </span>
                             </td>
-                            <td><span style="color: var(--primary); font-weight: 600;">{{ $resource->category->name }}</span></td>
                             <td>
                                 <small>
-                                    @if($resource->cpu) CPU: {{ $resource->cpu }} @endif
-                                    @if($resource->ram) | RAM: {{ $resource->ram }} @endif
+                                    @if($resource->cpu) CPU: {{ $resource->cpu }} | @endif
+                                    @if($resource->ram) RAM: {{ $resource->ram }} | @endif
+                                    {{ $resource->capacity ?? 'N/A' }}
                                 </small>
                             </td>
                             <td>
@@ -200,16 +157,14 @@
                             <td style="text-align: center;">
                                 @auth
                                     @if($resource->status == 'available')
-                                        <form action="{{ route('reservations.store') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="resource_id" value="{{ $resource->id }}">
-                                            <button type="submit" class="btn btn-success">RESERVER</button>
-                                        </form>
+                                        <a href="{{ route('reservations.create', ['resource' => $resource->id]) }}" class="btn btn-success">
+                                            RESERVER
+                                        </a>
                                     @else
                                         <span style="font-size: 0.7rem; color: var(--text-muted);">INDISPONIBLE</span>
                                     @endif
                                 @else
-                                    <a href="{{ route('login') }}" style="font-size: 0.7rem; text-decoration: underline;">Se connecter</a>
+                                    <a href="{{ route('login') }}" class="btn btn-primary">LOGIN</a>
                                 @endauth
                             </td>
                         </tr>

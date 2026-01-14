@@ -24,7 +24,12 @@ Route::get('/', function () {
     return view('welcome', compact('reservations', 'resources')); 
 })->name('welcome');
 
-// Authentification
+/*
+|--------------------------------------------------------------------------
+| 2. AUTHENTIFICATION (GUEST)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -32,63 +37,66 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
 });
 
-Route::post('/logout', [LoginController::class,'logout'])->name('logout')->middleware('auth');
-
-Route::get('/home', function () {
-    return view('home'); 
-})->name('home')->middleware('auth');
-
 /*
 |--------------------------------------------------------------------------
-| 2. ROUTES PROTÉGÉES (COMMUNES)
+| 3. ROUTES PROTÉGÉES (CONNEXION REQUISE)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth'])->group(function () {
-    // Formulaire de réservation (Chorouk)
-    Route::get('/reservations/create/{resource}', [ReservationController::class, 'create'])->name('reservations.create');
+
+    Route::post('/logout', [LoginController::class,'logout'])->name('logout');
+    Route::redirect('/home', '/'); // Redirige /home vers l'accueil
+
+    // --- LOGIQUE DE RÉSERVATION (Chorouk + Toi) ---
+    // On permet de passer l'ID de la ressource ou d'arriver sur un formulaire vide
+    Route::get('/reservations/create/{resource?}', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
-    
-    // Signalement d'incident (Accessible par Utilisateur et Tech)
+
+    // --- LOGIQUE D'INCIDENTS ---
     Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
-});
 
-/*
-|--------------------------------------------------------------------------
-| 3. DASHBOARD ADMINISTRATEUR
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | TYPE 1 : ADMINISTRATEUR
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:Admin'])->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        
+        // Gestion des utilisateurs et maintenance
+        Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
+        Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle');
+        Route::patch('/admin/resources/{resource}/maintenance', [AdminController::class, 'toggleMaintenance'])->name('admin.resources.maintenance');
+        
+        // CRUD Complet
+        Route::resource('resources', ResourceController::class);
+    });
 
-Route::middleware(['auth', 'role:Admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
-    Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle');
-    Route::patch('/admin/resources/{resource}/maintenance', [AdminController::class, 'toggleMaintenance'])->name('admin.resources.maintenance');
-});
+    /*
+    |--------------------------------------------------------------------------
+    | TYPE 2 : RESPONSABLE TECHNIQUE
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:Responsable Technique'])->group(function(){
+        Route::get('/responsable/dashboard', [TechController::class, 'dashboard'])->name('tech.dashboard');
+        
+        // Validation des réservations
+        Route::put('/reservations/{reservation}/update', [ReservationController::class, 'update'])->name('reservations.update');
+        
+        // Consultation incidents
+        Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
+    });
 
-/*
-|--------------------------------------------------------------------------
-| 4. DASHBOARD RESPONSABLE TECHNIQUE
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | TYPE 3 : UTILISATEUR INTERNE (Toi)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:Utilisateur Interne'])->group(function(){
+        // Ton Dashboard avec historique et filtres
+        Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    });
 
-Route::middleware(['auth', 'role:Responsable Technique'])->group(function(){
-    Route::get('/responsable/dashboard', [TechController::class, 'dashboard'])->name('tech.dashboard');
-    Route::put('/reservations/{reservation}/update', [ReservationController::class, 'update'])->name('reservations.update');
-    
-    // Ressources CRUD pour le Tech
-    Route::resource('resources', ResourceController::class)->only(['index', 'show']);
-    Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
-});
-
-/*
-|--------------------------------------------------------------------------
-| 5. DASHBOARD UTILISATEUR INTERNE (Ingénieur / Enseignant / Doctorant)
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:Utilisateur Interne'])->group(function () {
-    // On utilise UserController@dashboard pour l'historique et les filtres
-    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });

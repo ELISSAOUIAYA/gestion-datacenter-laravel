@@ -9,87 +9,63 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
-   public function index()
-{
-    $user = Auth::user();
+    // Afficher le dashboard de l'utilisateur
+    public function index()
+    {
+        $reservations = Reservation::where('user_id', Auth::id())
+            ->with('resource')
+            ->latest()
+            ->get();
 
-    // On récupère les réservations de l'utilisateur connecté
-    $reservations = Reservation::where('user_id', $user->id)
-        ->with('resource')
-        ->latest()
-        ->get();
+        return view('user.dashboard', compact('reservations'));
+    }
 
-    // TRÈS IMPORTANT : Le nom de la vue doit être 'user.dashboard' 
-    // et on doit passer la variable 'reservations'
-    return view('user.dashboard', compact('reservations'));
-}
-    // 2. Stocker la réservation (Action depuis le bouton "Réserver" de l'accueil)
+    // Afficher le formulaire de réservation
+    public function create(Request $request)
+    {
+        // On récupère l'ID de la ressource
+        $resourceId = $request->query('resource_id') ?? $request->resource;
+        $resource = Resource::findOrFail($resourceId);
+
+        return view('reservations.create', compact('resource'));
+    }
+
+    // Enregistrer la réservation (Correction de l'erreur SQL)
     public function store(Request $request)
     {
-        // Validation
         $request->validate([
             'resource_id' => 'required|exists:resources,id',
-            // On peut rendre les dates optionnelles si on veut une réservation immédiate par défaut
-            'start_date'  => 'nullable|date|after_or_equal:today',
-            'end_date'    => 'nullable|date|after_or_equal:start_date',
+            'start_date'  => 'required|date|after_or_equal:today',
+            'end_date'    => 'required|date|after:start_date',
         ]);
 
-        // Vérification de sécurité : La ressource est-elle vraiment dispo ?
-        $resource = Resource::findOrFail($request->resource_id);
-        if ($resource->status !== 'available') {
-            return redirect()->back()->with('error', 'Désolé, cette ressource n\'est plus disponible.');
-        }
-
-        // Création
+        // On utilise 'pending' au lieu de 'en_attente' pour éviter l'erreur de troncature SQL
         Reservation::create([
-            'user_id'     => Auth::id(),
-            'resource_id' => $request->resource_id,
-            'start_date'  => $request->start_date ?? now(),
-            'end_date'    => $request->end_date ?? now()->addDays(7),
-            'status'      => 'en_attente', // Statut par défaut
+            'user_id'       => Auth::id(),
+            'resource_id'   => $request->resource_id,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'justification' => $request->justification ?? 'Besoin académique',
+            'status'        => 'pending', 
         ]);
 
-        return redirect()->route('welcome')->with('success', 'Demande de réservation envoyée avec succès !');
+        return redirect()->route('user.dashboard')->with('success', 'Demande envoyée avec succès !');
     }
 
-    // 3. Mettre à jour (Utilisé par le Responsable Technique pour Valider/Refuser)
+    // Mise à jour du statut par le Responsable Technique
     public function update(Request $request, Reservation $reservation)
-    {
-        $request->validate([
-            'status' => 'required|in:en_attente,validée,refusée',
-        ]);
+{
+    $request->validate([
+        'status' => 'required|in:approved,rejected', // On attend ces deux valeurs
+    ]);
 
-        // Si on valide la réservation, on peut changer le statut de la ressource en 'occupied'
-        if ($request->status === 'validée') {
-            $reservation->resource->update(['status' => 'occupied']);
-        } 
-        
-        // Si on refuse ou qu'on termine, on libère
-        if ($request->status === 'refusée') {
-            $reservation->resource->update(['status' => 'available']);
-        }
+    $reservation->update(['status' => $request->status]);
 
-        $reservation->update(['status' => $request->status]);
-
-        return redirect()->back()->with('success', 'Le statut de la réservation a été mis à jour.');
-    }
-
-    // 4. Supprimer/Annuler
+    return back()->with('success', 'La décision a été enregistrée.');
+}
     public function destroy(Reservation $reservation)
     {
-        // Libérer la ressource si elle était occupée
-        $reservation->resource->update(['status' => 'available']);
-        
         $reservation->delete();
-        return redirect()->back()->with('success', 'Réservation annulée.');
+        return back()->with('success', 'Réservation annulée.');
     }
-
-    public function create(Request $request)
-   {
-    // On récupère l'ID de la ressource depuis l'URL
-    $resource = Resource::findOrFail($request->resource_id);
-
-    // On renvoie vers la vue que Chorouk est en train de préparer
-    return view('reservations.create', compact('resource'));
-   }
 }
