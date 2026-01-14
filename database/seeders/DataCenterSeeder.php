@@ -33,7 +33,7 @@ class DataCenterSeeder extends Seeder
         $catSto = ResourceCategory::create(['name' => 'Stockage']);
         $catNet = ResourceCategory::create(['name' => 'Réseau']);
 
-        $categories = [$catSrv, $catVM, $catSto, $catNet];
+  
 
         // 3. CRÉATION DES UTILISATEURS
         User::create([
@@ -62,25 +62,63 @@ class DataCenterSeeder extends Seeder
 
         // 4. GÉNÉRATION DES 50 RESSOURCES (Correction de l'erreur SQL 'type')
         $models = [
-            'Serveur' => ['Dell PowerEdge', 'HP ProLiant'],
+           
             'VM' => ['Ubuntu Server', 'Windows Core'],
             'Stockage' => ['NetApp SAN', 'Synology NAS'],
             'Réseau' => ['Cisco Switch', 'Juniper Router']
         ];
+// 1. SERVEURS (ID: 1) - 15 équipements
+    for ($i = 1; $i <= 15; $i++) {
+        Resource::create([
+            'name' => "Equipement-IT-$i",
+            'resource_category_id' => 1,
+            'cpu' => rand(8, 32) . ' Cores',
+            'ram' => rand(16, 128) . ' Go',
+            'os' => 'Linux / Windows',
+            'location' => 'Rack-' . rand(1, 20),
+            'status' => 'available',
+            'bandwidth' => null, 'capacity' => null // Non compatibles
+        ]);
+    }
 
-        for ($i = 1; $i <= 50; $i++) {
-            $catObj = $categories[array_rand($categories)];
-            
-            Resource::create([
-                'name' => "Equipement-IT-" . $i,
-                'resource_category_id' => $catObj->id, // On utilise l'ID, pas 'type'
-                'cpu' => rand(4, 32) . " Cores",
-                'ram' => rand(8, 128) . " Go",
-                'capacity' => rand(100, 2000) . " Go",
-                'os' => (rand(0, 1) ? 'Linux' : 'Windows'),
-                'location' => 'Rack-' . rand(1, 20),
-                'status' => 'available'
-            ]);
-        }
+    // 2. VM (ID: 2) - 15 équipements
+    for ($i = 16; $i <= 30; $i++) {
+        Resource::create([
+            'name' => "Equipement-IT-$i",
+            'resource_category_id' => 2,
+            'cpu' => rand(2, 8) . ' vCPU',
+            'ram' => rand(4, 32) . ' Go',
+            'capacity' => rand(100, 2000) . ' Go',
+            'os' => 'Ubuntu / Debian',
+            'location' => 'Virtual-Cluster',
+            'status' => 'available',
+            'bandwidth' => null
+        ]);
+    }
+
+    // 3. STOCKAGE (ID: 3) - 10 équipements
+    for ($i = 31; $i <= 40; $i++) {
+        Resource::create([
+            'name' => "Equipement-IT-$i",
+            'resource_category_id' => 3,
+            'capacity' => rand(1, 100) . ' To',
+            'location' => 'Baie-Stockage-' . rand(1, 5),
+            'status' => 'available',
+            'cpu' => null, 'ram' => null, 'bandwidth' => null, 'os' => null
+        ]);
+    }
+
+    // 4. RÉSEAU (ID: 4) - 10 équipements
+    for ($i = 41; $i <= 50; $i++) {
+        Resource::create([
+            'name' => "Equipement-IT-$i",
+            'resource_category_id' => 4,
+            'bandwidth' => rand(1, 100) . ' Gbps',
+            'location' => 'Rack-Network-' . rand(1, 10),
+            'status' => 'available',
+            'cpu' => null, 'ram' => null, 'capacity' => null, 'os' => 'Cisco IOS'
+        ]);
+    }
+       
     }
 }

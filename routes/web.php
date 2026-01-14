@@ -17,10 +17,16 @@ use App\Models\Resource;
 | 1. ROUTES PUBLIQUES
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', function () {
+    // 1. Récupérer les réservations avec leurs relations
     $reservations = Reservation::with(['user', 'resource'])->get();
-    $resources = Resource::where('status', 'available')->get(); 
+
+    // 2. Récupérer les ressources : DISPONIBLES + TRIÉES + CHARGEMENT DE LA CATÉGORIE
+    $resources = Resource::with('category') // Eager loading pour éviter les ralentissements
+        ->where('status', 'available')     // Filtre : Uniquement les disponibles
+        ->orderBy('resource_category_id', 'asc') // Tri : 1, 2, 3, 4
+        ->get();
+
     return view('welcome', compact('reservations', 'resources')); 
 })->name('welcome');
 

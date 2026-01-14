@@ -36,10 +36,10 @@ class Resource extends Model
     /**
      * Relation avec la catégorie (Une ressource appartient à une catégorie)
      */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(ResourceCategory::class, 'resource_category_id');
-    }
+   public function category()
+{
+    return $this->belongsTo(ResourceCategory::class, 'resource_category_id');
+}
 
     /**
      * Relation avec les réservations (Une ressource peut avoir plusieurs réservations)
