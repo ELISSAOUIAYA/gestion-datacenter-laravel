@@ -52,16 +52,32 @@ class ReservationController extends Controller
         return redirect()->route('user.dashboard')->with('success', 'Demande envoyée avec succès !');
     }
 
-    // Mise à jour du statut par le Responsable Technique
-    public function update(Request $request, Reservation $reservation)
-{
-    $request->validate([
-        'status' => 'required|in:approved,rejected', // On attend ces deux valeurs
+         
+           public function update(Request $request, Reservation $reservation)
+    {
+             $request->validate([
+            'status' => 'required|in:pending,approved,rejected',
     ]);
 
-    $reservation->update(['status' => $request->status]);
+          $oldStatus = $reservation->status;
+          $reservation->update($request->all());
 
-    return back()->with('success', 'La décision a été enregistrée.');
+          
+        if ($oldStatus !== $request->status) {
+        $title = "Mise à jour de votre réservation";
+        
+        if ($request->status == 'approved') {
+            $message = "Félicitations ! Votre réservation pour la ressource [{$reservation->resource->name}] a été approuvée.";
+        } elseif ($request->status == 'rejected') {
+            $message = "Désolé, votre demande pour [{$reservation->resource->name}] a été refusée.";
+            $reservation->resource->update(['status' => 'available']);
+        }
+
+       
+        $reservation->user->addNotification($title, $message);
+    }
+
+    return back()->with('success', 'Statut mis à jour et utilisateur notifié.');
 }
     public function destroy(Reservation $reservation)
     {

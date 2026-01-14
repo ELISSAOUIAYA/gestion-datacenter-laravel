@@ -74,4 +74,16 @@ class User extends Authenticatable
     {
         return $this->role && $this->role->name === 'Utilisateur Interne';
     }
+    public function notifications()
+    {
+    return $this->hasMany(Notification::class);
+    }
+    public function addNotification($title, $message)
+    {
+    return $this->notifications()->create([
+        'title' => $title,
+        'message' => $message,
+        'is_read' => false
+    ]);
+    }
 }

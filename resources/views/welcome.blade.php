@@ -47,6 +47,103 @@
         .logo { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
         .logo span { color: var(--primary); }
         .nav-links { display: flex; gap: 20px; align-items: center; }
+        /* --- STYLE DU SYSTÈME DE NOTIFICATIONS --- */
+.notif-wrapper { 
+    position: relative; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center;
+}
+
+.notif-trigger { 
+    font-size: 1.3rem; 
+    display: flex; 
+    align-items: center; 
+    color: white; 
+    padding: 5px; 
+    position: relative;
+}
+
+.notif-badge { 
+    position: absolute; 
+    top: 0; 
+    right: -2px; 
+    background: var(--danger); 
+    color: white; 
+    font-size: 0.6rem; 
+    padding: 2px 5px; 
+    border-radius: 10px; 
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Le menu caché par défaut */
+.notif-dropdown { 
+    position: absolute; 
+    top: 100%; 
+    right: 0; 
+    width: 280px; 
+    background: var(--bg-card); 
+    border: 1px solid var(--border-color);
+    border-radius: 8px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: none; /* Caché */
+    color: var(--text-main); 
+    margin-top: 15px;
+    z-index: 2000;
+}
+
+
+.notif-header { 
+    padding: 12px; 
+    font-weight: bold; 
+    border-bottom: 1px solid var(--border-color); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: rgba(0,0,0,0.02);
+}
+
+.notif-body { 
+    max-height: 300px; 
+    overflow-y: auto; 
+}
+
+.notif-item { 
+    padding: 12px; 
+    border-bottom: 1px solid var(--border-color); 
+    font-size: 0.85rem; 
+    transition: 0.2s;
+}
+
+.notif-item:hover {
+    background: rgba(0,0,0,0.02);
+}
+
+.notif-item.unread { 
+    border-left: 4px solid var(--primary); 
+    background: rgba(0,123,255,0.05); 
+}
+
+.notif-item strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.85rem;
+}
+
+.notif-item p { 
+    margin: 0; 
+    color: var(--text-muted); 
+    font-size: 0.8rem; 
+    line-height: 1.3; 
+}
+
+.notif-item small { 
+    display: block;
+    margin-top: 5px;
+    font-size: 0.7rem; 
+    opacity: 0.6; 
+}
 
         /* Hero Section */
         .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') no-repeat center/cover;
@@ -76,33 +173,68 @@
 
         .theme-toggle { position: fixed; bottom: 30px; right: 30px; padding: 12px 20px; border-radius: 50px; background: var(--dark); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
         footer { text-align: center; padding: 40px; background: var(--dark); color: white; font-size: 0.8rem; margin-top: 60px; }
+        .notif-dropdown.show {
+    display: block !important; /* Force l'affichage */
+}
     </style>
 </head>
+
 <body data-theme="light">
 
-    <nav class="navbar">
-        <div class="container nav-content">
-            <a href="{{ url('/') }}" class="logo">
-                <i class='bx bxs-server'></i> DataCenter <span>Pro</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="{{ url('/') }}">Accueil</a></li>
-                @guest
-                    <li><a href="{{ route('login') }}">Connexion</a></li>
-                    <li><a href="{{ route('register') }}" class="btn btn-primary">Inscription</a></li>
-                @else
-                    <li><a href="{{ route('user.dashboard') }}"><strong>Mon Dashboard</strong></a></li>
-                    <li>
-                        <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-danger">Quitter</button>
-                        </form>
-                    </li>
-                @endguest
-            </ul>
-        </div>
-    </nav>
+    <<nav class="navbar">
+    <div class="container nav-content">
+        <a href="{{ url('/') }}" class="logo">
+            <i class='bx bxs-server'></i> DataCenter <span>Pro</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="{{ url('/') }}">Accueil</a></li>
+            
+            @guest
+                <li><a href="{{ route('login') }}">Connexion</a></li>
+                <li><a href="{{ route('register') }}" class="btn btn-primary">Inscription</a></li>
+            @else
+                <li class="notif-wrapper" id="notifBtn">
+                    <div class="notif-trigger">
+                        <i class='bx bxs-bell'></i>
+                        @php 
+                            $uCount = Auth::user()->notifications()->where('is_read', false)->count(); 
+                        @endphp
+                        @if($uCount > 0) 
+                            <span class="notif-badge">{{ $uCount }}</span> 
+                        @endif
+                    </div>
+                    <div class="notif-dropdown">
+                        <div class="notif-header">
+                            <span>Messages</span> 
+                            <small style="color: var(--primary);">{{ $uCount }} nouveaux</small>
+                        </div>
+                        <div class="notif-body">
+                            @forelse(Auth::user()->notifications()->latest()->take(5)->get() as $n)
+                                <div class="notif-item {{ $n->is_read ? '' : 'unread' }}">
+                                    <strong>{{ $n->title }}</strong>
+                                    <p>{{ $n->message }}</p>
+                                    <small>{{ $n->created_at->diffForHumans() }}</small>
+                                </div>
+                            @empty
+                                <div style="padding:20px; text-align:center; color:gray; font-size: 0.8rem;">
+                                    Aucune notification
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </li>
 
+                <li><a href="{{ route('user.dashboard') }}"><strong>Mon Dashboard</strong></a></li>
+                <li>
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger">Quitter</button>
+                    </form>
+                </li>
+            @endguest
+        </ul>
+    </div>
+</nav>
     <header class="hero">
         <div class="container">
             <h1>Supervision de l'Infrastructure</h1>
@@ -200,6 +332,27 @@
                 themeText.innerText = "Mode Sombre";
             }
         });
+        // --- SCRIPT POUR LES NOTIFICATIONS ---
+const btnNotif = document.getElementById('notifBtn');
+const dropdownNotif = document.querySelector('.notif-dropdown');
+
+if (btnNotif && dropdownNotif) {
+    // Ouvrir/Fermer au clic
+    btnNotif.addEventListener('click', function(event) {
+        event.stopPropagation(); // Empêche la fermeture immédiate
+        dropdownNotif.classList.toggle('show');
+    });
+
+    // Empêcher la fermeture quand on clique dans le menu pour scroller
+    dropdownNotif.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Fermer si on clique ailleurs sur la page
+    document.addEventListener('click', function() {
+        dropdownNotif.classList.remove('show');
+    });
+}
     </script>
 </body>
 </html>
