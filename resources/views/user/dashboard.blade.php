@@ -113,12 +113,14 @@
 
         <table class="res-table">
             <thead>
-    <tr>
-        <th><a href="?sort=resource_id&order=asc">Ressource</a></th>
-        <th><a href="?sort=start_date&order=asc">Date Début</a></th>
-        <th><a href="?sort=status&order=asc">Statut</a></th>
-    </tr>
-</thead>
+                <tr>
+                    <th>Ressource</th>
+                    <th>Période</th>
+                    <th>Justification</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
             <tbody>
                 @forelse($reservations as $res)
                 <tr>

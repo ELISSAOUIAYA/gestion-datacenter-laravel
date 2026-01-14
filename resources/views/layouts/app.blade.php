@@ -50,26 +50,6 @@
                 <i class='bx bxs-dashboard me-2'></i> Dashboard
             </a>
         </li>
-        <li class="mb-2">
-            <a href="#" class="nav-link text-white d-flex align-items-center">
-                <i class='bx bxs-server me-2'></i> Liste des Serveurs
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="#" class="nav-link text-white d-flex align-items-center">
-                <i class='bx bx-pulse me-2'></i> Monitoring
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="#" class="nav-link text-white d-flex align-items-center">
-                <i class='bx bxs-group me-2'></i> Utilisateurs
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="#" class="nav-link text-white d-flex align-items-center text-warning">
-                <i class='bx bxs-error me-2'></i> Alertes (3)
-            </a>
-        </li>
         <li class="nav-item">
     <a href="{{ route('user.historique') }}" class="nav-link">
         <i class='bx bx-history'></i>
