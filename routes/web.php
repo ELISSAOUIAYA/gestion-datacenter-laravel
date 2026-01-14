@@ -51,8 +51,7 @@ Route::middleware(['auth'])->group(function () {
     // --- LOGIQUE DE RÉSERVATION (Chorouk + Toi) ---
     // On permet de passer l'ID de la ressource ou d'arriver sur un formulaire vide
     Route::get('/reservations/create/{resource?}', [ReservationController::class, 'create'])->name('reservations.create');
-    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
-
+    Route::post('/valider-reservation', [ReservationController::class, 'store'])->name('reservations.store');
     // --- LOGIQUE D'INCIDENTS ---
     Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
     Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
@@ -88,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
         // Consultation incidents
         Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
         Route::delete('/manager/incidents/{incident}', [IncidentController::class, 'destroy'])->name('manager.incidents.destroy');
+       
     });
 
     /*
@@ -95,9 +95,12 @@ Route::middleware(['auth'])->group(function () {
     | TYPE 3 : UTILISATEUR INTERNE (Toi)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:Utilisateur Interne'])->group(function(){
-        // Ton Dashboard avec historique et filtres
+        Route::get('/historique', [UserController::class, 'historique'])->name('user.historique');
         Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+
+    Route::middleware(['role:Utilisateur Interne'])->group(function(){
+        
+        
     });
 
 });

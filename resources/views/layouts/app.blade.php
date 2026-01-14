@@ -70,6 +70,12 @@
                 <i class='bx bxs-error me-2'></i> Alertes (3)
             </a>
         </li>
+        <li class="nav-item">
+    <a href="{{ route('user.historique') }}" class="nav-link">
+        <i class='bx bx-history'></i>
+        <span class="link-name">Mon Historique</span>
+    </a>
+    </li>
     </ul>
     <hr class="text-secondary">
     <div class="dropdown">

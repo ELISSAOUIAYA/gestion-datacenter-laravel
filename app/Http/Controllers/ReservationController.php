@@ -32,25 +32,29 @@ class ReservationController extends Controller
 
     // Enregistrer la réservation (Correction de l'erreur SQL)
     public function store(Request $request)
-    {
-        $request->validate([
-            'resource_id' => 'required|exists:resources,id',
-            'start_date'  => 'required|date|after_or_equal:today',
-            'end_date'    => 'required|date|after:start_date',
-        ]);
+{
+    // 1. On prépare les données en ajoutant manuellement l'ID de l'utilisateur connecté
+    $data = $request->all();
+    $data['user_id'] = auth()->id(); // C'est cette ligne qui manquait !
+    $data['status'] = 'pending'; // On s'assure que le statut est défini par défaut
 
-        // On utilise 'pending' au lieu de 'en_attente' pour éviter l'erreur de troncature SQL
-        Reservation::create([
-            'user_id'       => Auth::id(),
-            'resource_id'   => $request->resource_id,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'justification' => $request->justification ?? 'Besoin académique',
-            'status'        => 'pending', 
-        ]);
+    // 2. Vérification des conflits (Détail n°1)
+    $conflit = Reservation::where('resource_id', $request->resource_id)
+        ->where(function ($query) use ($request) {
+            $query->whereBetween('start_date', [$request->start_date, $request->end_date])
+                  ->orWhereBetween('end_date', [$request->start_date, $request->end_date]);
+        })
+        ->exists();
 
-        return redirect()->route('user.dashboard')->with('success', 'Demande envoyée avec succès !');
+    if ($conflit) {
+        return back()->with('error', 'Cette machine est déjà réservée pour cette période !');
     }
+
+    // 3. Création avec les données complétées
+    Reservation::create($data);
+
+    return redirect()->route('user.dashboard')->with('success', 'Réservation effectuée !');
+}
 
          
            public function update(Request $request, Reservation $reservation)

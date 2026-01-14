@@ -40,6 +40,22 @@ class UserController extends Controller
         // C'est ce qui corrige ton erreur "Undefined variable"
         return view('user.dashboard', compact('reservations', 'stats'));
     }
+  public function historique(Request $request)
+{
+    $user = Auth::user();
+
+    // On récupère le choix de la colonne (par défaut 'start_date')
+    // On récupère le choix de l'ordre (par défaut 'desc' pour voir le plus récent)
+    $sort = $request->get('sort', 'start_date'); 
+    $order = $request->get('order', 'desc');
+
+    $reservations = Reservation::with(['resource'])
+        ->where('user_id', $user->id) 
+        ->orderBy($sort, $order) // C'est cette ligne qui fait le travail !
+        ->get();
+
+    return view('user.historique', compact('reservations'));
+}
 
     /**
      * Permet à l'utilisateur de visualiser les ressources disponibles.

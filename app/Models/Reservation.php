@@ -18,15 +18,16 @@ class Reservation extends Model
         'status'
     ];
 
-    // Une réservation appartient à un utilisateur
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    // app/Models/Reservation.php
 
-    // Une réservation concerne une ressource
-    public function resource()
-    {
-        return $this->belongsTo(Resource::class);
-    }
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+// Ajoute aussi celle pour la ressource si ce n'est pas fait
+public function resource()
+{
+    return $this->belongsTo(Resource::class);
+}
 }
