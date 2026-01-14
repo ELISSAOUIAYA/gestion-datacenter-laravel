@@ -4,41 +4,36 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request; // NE PAS OUBLIER CET IMPORT
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    /**
-<<<<<<< HEAD
-     * Cette méthode remplace la propriété $redirectTo pour une redirection dynamique.
-=======
-     * Where to redirect users after login.
-     *
-     * @var string
-     */protected $redirectTo = '/';
+    protected $redirectTo = '/';
 
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
+        $this->middleware('auth')->only('logout');
+    }
 
     /**
-     * Create a new controller instance.
-     *
-     * @return void
->>>>>>> 6b6938a87494967ca753f4467d5315b2d458f845
+     * Redirection dynamique après connexion
      */
     protected function redirectTo()
     {
         $user = Auth::user();
 
-        // SÉCURITÉ : Si l'utilisateur n'a pas de rôle en base de données
         if (!$user->role) {
-            return route('welcome'); 
+            return '/';
         }
 
-        $role = $user->role->name;
+        // Si role est une relation, on prend le nom, sinon la valeur directe
+        $roleName = is_object($user->role) ? $user->role->name : $user->role;
 
-        // Redirection selon le nom exact du rôle
-        switch ($role) {
+        switch ($roleName) {
             case 'Admin':
                 return route('admin.dashboard');
             case 'Responsable Technique':
@@ -46,13 +41,30 @@ class LoginController extends Controller
             case 'Utilisateur Interne':
                 return route('user.dashboard');
             default:
-                return '/'; // Retour à l'accueil si le rôle est inconnu
+                return '/';
         }
     }
 
-    public function __construct()
+    /**
+     * Surcharge de la fonction login pour vérifier le statut
+     */
+    public function login(Request $request)
     {
-        $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
+        $this->validateLogin($request);
+
+        // Tentative de connexion avec email, password ET status active
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'status' => 'active'], $request->filled('remember'))) {
+            return $this->sendLoginResponse($request);
+        }
+
+        // Vérification si l'échec est dû au statut
+        $user = \App\Models\User::where('email', $request->email)->first();
+        if ($user && $user->status !== 'active') {
+            return back()->withErrors([
+                'email' => 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
+            ]);
+        }
+
+        return $this->sendFailedLoginResponse($request);
     }
 }

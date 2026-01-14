@@ -8,68 +8,94 @@ use Illuminate\Http\Request;
 
 class ResourceController extends Controller
 {
-    // Lister toutes les ressources
+    /**
+     * Lister toutes les ressources pour l'interface d'accueil
+     * Triées par catégorie (1, 2, 3, 4) et filtrées par disponibilité
+     */
     public function index()
     {
-<<<<<<< HEAD
-        // On récupère toutes les lignes de ta table 'resources'
-        $serveurs = Resource::all(); 
-        
- 
-       return view('resources.index', ['resources' => $serveurs]);
-=======
-        $resources = Resource::with('category')->get(); // charger la catégorie liée
-        return response()->json($resources);
->>>>>>> 13c9a2bcad9fb762335b5a6440755449cd5fffda
+        // On récupère les ressources avec leur catégorie liée
+        // On filtre uniquement les disponibles et on trie par ID de catégorie
+        $resources = Resource::with('category')
+            ->where('status', 'available')
+            ->orderBy('resource_category_id', 'asc')
+            ->get();
+
+        // On renvoie vers la vue welcome (ou resources.index selon ton choix)
+        // compact('resources') permet de passer la variable à la vue
+        return view('welcome', compact('resources'));
     }
 
-    // Formulaire de création (juste pour API, renvoie les catégories)
+    /**
+     * Formulaire de création / API catégories
+     */
     public function create()
     {
         $categories = ResourceCategory::all();
         return response()->json($categories);
     }
 
-    // Stocker une nouvelle ressource
+    /**
+     * Stocker une nouvelle ressource
+     */
     public function store(Request $request)
     {
+        // Validation avec la notation resource_category_id
         $request->validate([
             'name' => 'required|string',
-            'category_id' => 'required|exists:resource_categories,id',
+            'resource_category_id' => 'required|exists:resource_categories,id',
+            'status' => 'required|string'
         ]);
 
         $resource = Resource::create($request->all());
-        return response()->json($resource, 201);
+
+        return response()->json([
+            'message' => 'Ressource créée avec succès',
+            'resource' => $resource
+        ], 201);
     }
 
-    // Afficher une ressource
+    /**
+     * Afficher une ressource spécifique
+     */
     public function show(Resource $resource)
     {
         return response()->json($resource->load('category'));
     }
 
-    // Formulaire édition
+    /**
+     * Formulaire d'édition
+     */
     public function edit(Resource $resource)
     {
         return response()->json($resource);
     }
 
-    // Mettre à jour
+    /**
+     * Mettre à jour une ressource
+     */
     public function update(Request $request, Resource $resource)
     {
+        // Validation avec la notation resource_category_id
         $request->validate([
             'name' => 'sometimes|required|string',
-            'category_id' => 'sometimes|required|exists:resource_categories,id',
+            'resource_category_id' => 'sometimes|required|exists:resource_categories,id',
         ]);
 
         $resource->update($request->all());
-        return response()->json($resource);
+
+        return response()->json([
+            'message' => 'Ressource mise à jour',
+            'resource' => $resource
+        ]);
     }
 
-    // Supprimer
+    /**
+     * Supprimer une ressource
+     */
     public function destroy(Resource $resource)
     {
         $resource->delete();
-        return response()->json(['message' => 'Resource deleted']);
+        return response()->json(['message' => 'Ressource supprimée avec succès']);
     }
 }

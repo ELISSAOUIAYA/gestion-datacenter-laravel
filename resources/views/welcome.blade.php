@@ -5,166 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>DataCenter Pro | Infrastructure</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
     <style>
+        /* --- VARIABLES & THEME --- */
         :root {
-            --primary: #007bff; --bg-body: #f4f7f6; --bg-card: #ffffff;
-            --text-main: #333; --border-color: #eee; --dark: #1a1d20;
-        }
-        [data-theme="dark"] {
-            --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0; --border-color: #333;
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --bg-body: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #333;
+            --text-muted: #777;
+            --border: #eeeeee;
+            --dark: #1a1d20;
+            --success: #28a745;
+            --danger: #dc3545;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: 0.3s; }
-
+        /* --- RESET & LAYOUT --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        a { text-decoration: none; color: inherit; }
 
-        /* Navbar */
-        .navbar { background: var(--dark); color: white; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; }
+        /* --- NAVIGATION --- */
+        .navbar { background: var(--dark); color: white; padding: 15px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .nav-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
         .logo span { color: var(--primary); }
-        .nav-links { display: flex; gap: 20px; align-items: center; list-style: none; }
+        .nav-links { display: flex; gap: 25px; align-items: center; list-style: none; }
 
-        /* Notifications */
-        .notif-wrapper { position: relative; cursor: pointer; }
-        .notif-trigger { font-size: 1.3rem; color: white; position: relative; }
-        .notif-badge { position: absolute; top: 0; right: -2px; background: #dc3545; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; }
+        /* --- NOTIFICATIONS --- */
+        .notif-wrapper { position: relative; }
+        .notif-trigger { font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; }
+        .notif-badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
         .notif-dropdown { 
-            position: absolute; top: 100%; right: 0; width: 280px; background: var(--bg-card); 
-            border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-            display: none; margin-top: 15px; z-index: 2000; color: var(--text-main);
+            position: absolute; top: 130%; right: 0; width: 300px; background: white; border-radius: 10px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; z-index: 2000; border: 1px solid var(--border); overflow: hidden;
         }
         .notif-dropdown.show { display: block; }
+        .notif-header { padding: 12px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; }
+        .notif-item { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; color: #444; }
+        .notif-item.unread { background: #f0f7ff; border-left: 4px solid var(--primary); }
 
-<<<<<<< HEAD
-.notif-badge { 
-    position: absolute; 
-    top: 0; 
-    right: -2px; 
-    background: var(--danger); 
-    color: white; 
-    font-size: 0.6rem; 
-    padding: 2px 5px; 
-    border-radius: 10px; 
-    font-weight: bold;
-    line-height: 1;
-}
+        /* --- HERO --- */
+        .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') center/cover;
+                color: white; text-align: center; padding: 80px 20px; margin-bottom: 60px; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
 
-/* Le menu caché par défaut */
-.notif-dropdown { 
-    position: absolute; 
-    top: 100%; 
-    right: 0; 
-    width: 280px; 
-    background: var(--bg-card); 
-    border: 1px solid var(--border-color);
-    border-radius: 8px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    display: none; /* Caché */
-    color: var(--text-main); 
-    margin-top: 15px;
-    z-index: 2000;
-}
-
-
-.notif-header { 
-    padding: 12px; 
-    font-weight: bold; 
-    border-bottom: 1px solid var(--border-color); 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    background: rgba(0,0,0,0.02);
-}
-
-.notif-body { 
-    max-height: 300px; 
-    overflow-y: auto; 
-}
-
-.notif-item { 
-    padding: 12px; 
-    border-bottom: 1px solid var(--border-color); 
-    font-size: 0.85rem; 
-    transition: 0.2s;
-}
-
-.notif-item:hover {
-    background: rgba(0,0,0,0.02);
-}
-
-.notif-item.unread { 
-    border-left: 4px solid var(--primary); 
-    background: rgba(0,123,255,0.05); 
-}
-
-.notif-item strong {
-    display: block;
-    margin-bottom: 3px;
-    font-size: 0.85rem;
-}
-
-.notif-item p { 
-    margin: 0; 
-    color: var(--text-muted); 
-    font-size: 0.8rem; 
-    line-height: 1.3; 
-}
-
-.notif-item small { 
-    display: block;
-    margin-top: 5px;
-    font-size: 0.7rem; 
-    opacity: 0.6; 
-}
-.notif-badge {
-    transition: opacity 0.3s ease;
-}
-.notif-item.unread {
-    background-color: #f0f7ff; /* Un léger bleu pour les messages non lus */
-}
-
-        /* Hero Section */
-=======
-        /* Hero */
->>>>>>> b33ce9a939ae5a5fa91de1baf76edf1347823481
-        .hero { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1600') no-repeat center/cover;
-                color: white; text-align: center; padding: 60px 20px; margin-bottom: 50px; }
-
-        /* Categories */
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: -80px; }
+        /* --- CATEGORY CARDS (GRID) --- */
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-top: -110px; }
         .cat-card { 
-            background: var(--bg-card); padding: 30px; border-radius: 15px; text-align: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border: 3px solid transparent; 
+            background: white; padding: 40px 20px; border-radius: 20px; text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent; 
         }
-        .cat-card:hover { transform: translateY(-5px); }
-        .cat-card.active { border-color: var(--primary); background: rgba(0, 123, 255, 0.05); }
-        .cat-card i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
+        .cat-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+        .cat-card.active { border-color: var(--primary); background: #f0f7ff; }
+        .cat-card i { font-size: 3.5rem; color: var(--primary); margin-bottom: 20px; }
+        .cat-card h3 { font-size: 1.1rem; color: var(--dark); margin-bottom: 5px; }
+        .cat-card p { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* Table Section */
-        .inventory-section { background: var(--bg-card); border-radius: 12px; padding: 25px; margin-top: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* --- INVENTORY TABLE --- */
+        .inventory-section { background: white; border-radius: 15px; padding: 35px; margin: 40px 0; box-shadow: 0 5px 25px rgba(0,0,0,0.05); display: none; }
+        #table-title { margin-bottom: 30px; font-size: 1.3rem; font-weight: 700; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 15px; text-transform: uppercase; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { padding: 15px; background: rgba(0,0,0,0.02); text-align: left; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); }
-        td { padding: 15px; border-bottom: 1px solid var(--border-color); }
+        th { text-align: left; padding: 15px; background: #fafafa; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #eee; }
+        td { padding: 20px 15px; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
 
-        .resource-row { display: none; } /* CACHÉ AU DÉBUT */
+        .resource-row { display: none; }
         .resource-row.visible { display: table-row; }
-        
-        #empty-message { text-align: center; padding: 40px; color: var(--text-muted); }
 
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-primary { background: var(--primary); color: white; }
-        
-        .status-pill { padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; }
+        /* --- COMPONENTS --- */
+        .status-pill { padding: 5px 15px; border-radius: 30px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .status-available { background: #d4edda; color: #155724; }
         .status-occupied { background: #fff3cd; color: #856404; }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success:hover { background: #218838; }
 
-        footer { text-align: center; padding: 40px; background: var(--dark); color: white; margin-top: 50px; }
+        footer { text-align: center; padding: 50px; color: #aaa; font-size: 0.8rem; border-top: 1px solid #eee; }
     </style>
 </head>
-<body data-theme="light">
+<body>
 
 <nav class="navbar">
     <div class="container nav-content">
@@ -181,22 +105,27 @@
                         @if($uCount > 0) <span class="notif-badge">{{ $uCount }}</span> @endif
                     </div>
                     <div class="notif-dropdown">
-                        <div class="notif-header">Messages</div>
+                        <div class="notif-header">
+                            <span>Notifications</span>
+                            <small id="notif-count" style="color: var(--primary);">{{ $uCount }} nouveaux</small>
+                        </div>
                         <div class="notif-body">
                             @forelse(Auth::user()->notifications()->latest()->take(5)->get() as $n)
-                                <div style="padding:10px; border-bottom:1px solid #eee;">
-                                    <strong>{{ $n->title }}</strong><br><small>{{ $n->message }}</small>
+                                <div class="notif-item {{ $n->is_read ? '' : 'unread' }}">
+                                    <strong>{{ $n->title }}</strong>
+                                    <p style="font-size: 0.8rem; margin: 4px 0; color: #666;">{{ $n->message }}</p>
+                                    <small style="font-size: 0.7rem; opacity: 0.6;">{{ $n->created_at->diffForHumans() }}</small>
                                 </div>
                             @empty
-                                <div style="padding:20px; text-align:center;">Rien de neuf</div>
+                                <div style="padding:20px; text-align:center; color:#999;">Aucune alerte</div>
                             @endforelse
                         </div>
                     </div>
                 </li>
-                <li><a href="{{ route('user.dashboard') }}"><strong>Mon Dashboard</strong></a></li>
+                <li><a href="{{ route('user.dashboard') }}"><strong>Dashboard</strong></a></li>
                 <li>
                     <form action="{{ route('logout') }}" method="POST">@csrf
-                        <button type="submit" style="background:none; border:none; color:#dc3545; cursor:pointer; font-weight:bold;">Quitter</button>
+                        <button type="submit" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; font-size:0.9rem;">Déconnexion</button>
                     </form>
                 </li>
             @endguest
@@ -206,8 +135,8 @@
 
 <header class="hero">
     <div class="container">
-        <h1>Infrastructure Supervision</h1>
-        <p>Sélectionnez une catégorie pour voir les équipements disponibles.</p>
+        <h1>Infrastructure de Pointe</h1>
+        <p>Explorez et réservez nos ressources haute performance en un clic.</p>
     </div>
 </header>
 
@@ -216,219 +145,101 @@
         <div class="cat-card" onclick="filterResources('SERVEUR', this)">
             <i class='bx bxs-chip'></i>
             <h3>SERVEURS</h3>
-            <p>Physiques & Bare Metal</p>
+            <p>Calcul intensif & Bare Metal</p>
         </div>
         <div class="cat-card" onclick="filterResources('VM', this)">
             <i class='bx bxs-cloud'></i>
-            <h3>MACHINES VIRTUELLES</h3>
-            <p>Instances Cloud</p>
+            <h3>VM</h3>
+            <p>Instances Cloud flexibles</p>
         </div>
         <div class="cat-card" onclick="filterResources('STOCKAGE', this)">
             <i class='bx bxs-hdd'></i>
             <h3>STOCKAGE</h3>
-            <p>Volumes SSD & NAS</p>
+            <p>Unités NAS & SAN sécurisées</p>
         </div>
         <div class="cat-card" onclick="filterResources('RESEAU', this)">
             <i class='bx bx-transfer-alt'></i>
             <h3>RÉSEAU</h3>
-            <p>Switchs & Routeurs</p>
+            <p>Interconnexion haute vitesse</p>
         </div>
     </div>
 
-    <div class="inventory-section">
-        <div id="empty-message">
-            <i class='bx bx-mouse-alt' style="font-size: 3rem; opacity: 0.3;"></i>
-            <p>Veuillez cliquer sur une catégorie ci-dessus pour afficher les équipements.</p>
-        </div>
-
-<<<<<<< HEAD
-        <section id="ressources">
-            <h4><i class='bx bx-hdd'></i> Inventaire des Ressources</h4>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Capacité / Spécifications</th>
-                            <th>État</th>
-                            <th style="text-align: center;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($resources as $resource)
-                        <tr>
-                            <td><strong>{{ $resource->name }}</strong></td>
-                            <td>
-                                <span style="color: var(--primary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">
-                                    {{ $resource->type ?? 'Serveur' }}
-                                </span>
-                            </td>
-                            <td>
-                                <small>
-                                    @if($resource->cpu) CPU: {{ $resource->cpu }} | @endif
-                                    @if($resource->ram) RAM: {{ $resource->ram }} | @endif
-                                    {{ $resource->capacity ?? 'N/A' }}
-                                </small>
-                            </td>
-                            <td>
-                                <span class="status-pill status-{{ $resource->status }}">
-                                    @if($resource->status == 'available') DISPONIBLE 
-                                    @elseif($resource->status == 'occupied') OCCUPÉ
-                                    @else MAINTENANCE @endif
-                                </span>
-                            </td>
-                            <td style="text-align: center;">
-                                @auth
-                                    @if($resource->status == 'available')
-                                        <a href="{{ route('reservations.create', ['resource' => $resource->id]) }}" class="btn btn-success">
-                                            RESERVER
-                                        </a>
-                                    @else
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">INDISPONIBLE</span>
-                                    @endif
-                                @else
-                                    <a href="{{ route('login') }}" class="btn btn-primary">LOGIN</a>
-                                @endauth
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const notifBtn = document.getElementById('notifBtn');
-    
-    if (notifBtn) {
-        notifBtn.addEventListener('click', function() {
-            // 1. Envoyer la requête au serveur
-            fetch("{{ route('notifications.markRead') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 2. Cacher le badge rouge visuellement
-                    const badge = document.querySelector('.notif-badge');
-                    if (badge) badge.style.display = 'none';
-                    
-                    // 3. Mettre à jour le texte "X nouveaux" en "0 nouveaux"
-                    const counterText = document.querySelector('.notif-header small');
-                    if (counterText) counterText.textContent = '0 nouveaux';
-                }
-            })
-            .catch(error => console.error('Erreur:', error));
-        });
-    }
-});
-</script>
-    </main>
-=======
-        <div id="table-wrapper" style="display: none;">
-            <h4 id="table-title">Équipements</h4>
-            <table>
+    <div class="inventory-section" id="inventory-section">
+        <h4 id="table-title">Liste des équipements</h4>
+        <table>
             <thead>
                 <tr>
-                  <th>Nom</th>
-                  <th>Spécifications Techniques</th>
-                  <th>État</th>
-                  <th style="text-align: center;">Action</th>
+                    <th>Désignation</th>
+                    <th>Spécifications Techniques</th>
+                    <th>Statut</th>
+                    <th style="text-align: center;">Action</th>
                 </tr>
-              </thead>
-                  <tbody>
-    @foreach($resources as $resource)
-        @php
-            // 1. Normalisation du nom de la catégorie pour le filtrage JavaScript
-            $catName = optional($resource->category)->name ?? 'inconnu';
-            $normalizedCat = strtolower(str_replace(['é', 'è', 'ê', 'É', 'È', 'Ê'], 'e', $catName));
->>>>>>> b33ce9a939ae5a5fa91de1baf76edf1347823481
+            </thead>
+            <tbody>
+                @foreach($resources as $resource)
+                    @php
+                        $catName = optional($resource->category)->name ?? 'inconnu';
+                        $normalizedCat = strtolower(str_replace(['é', 'è', 'ê', 'É', 'È', 'Ê'], 'e', $catName));
 
-            // 2. Construction dynamique de la liste des spécifications (élimine les "null")
-            $specs = [];
-            if (!empty($resource->cpu)) {
-                $specs[] = "<strong>CPU:</strong> " . $resource->cpu;
-            }
-            if (!empty($resource->ram)) {
-                $specs[] = "<strong>RAM:</strong> " . $resource->ram;
-            }
-            if (!empty($resource->bandwidth)) {
-                $specs[] = "<strong>Débit:</strong> " . $resource->bandwidth;
-            }
-            if (!empty($resource->capacity)) {
-                $specs[] = "<strong>Capacité:</strong> " . $resource->capacity;
-            }
-            if (!empty($resource->os)) {
-                $specs[] = "<strong>OS:</strong> " . $resource->os;
-            }
-        @endphp
+                        $specs = [];
+                        if($resource->cpu) $specs[] = "<strong>CPU:</strong> {$resource->cpu}";
+                        if($resource->ram) $specs[] = "<strong>RAM:</strong> {$resource->ram}";
+                        if($resource->bandwidth) $specs[] = "<strong>Débit:</strong> {$resource->bandwidth}";
+                        if($resource->capacity) $specs[] = "<strong>Capacité:</strong> {$resource->capacity}";
+                        if($resource->os) $specs[] = "<strong>OS:</strong> {$resource->os}";
+                    @endphp
 
-        <tr class="resource-row" data-category="{{ $normalizedCat }}">
-            
-            <td><strong>{{ $resource->name }}</strong></td>
-
-            <td style="font-size: 0.85rem; color: #555;">
-                @if(count($specs) > 0)
-                    {{-- On joint les éléments avec une barre grise discrète --}}
-                    {!! implode(' <span style="color: #d1d1d1; margin: 0 5px;">|</span> ', $specs) !!}
-                @else
-                    <span style="color: #aaa; font-style: italic;">Aucune spécification technique</span>
-                @endif
-            </td>
-
-            <td>
-                <span class="status-pill status-{{ $resource->status }}">
-                    {{ strtoupper($resource->status == 'available' ? 'Disponible' : ($resource->status == 'occupied' ? 'Occupé' : 'Maintenance')) }}
-                </span>
-            </td>
-
-            <td style="text-align: center;">
-                @auth
-                    @if($resource->status == 'available')
-                        <a href="{{ route('reservations.create', ['resource_id' => $resource->id]) }}" class="btn btn-success" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; text-decoration: none; color: white; background-color: #28a745;">
-                            RÉSERVER
-                        </a>
-                    @else
-                        <span style="font-size: 0.75rem; color: #95a5a6; font-weight: bold;">INDISPONIBLE</span>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; text-decoration: none; color: white; background-color: #007bff;">
-                        LOGIN
-                    </a>
-                @endauth
-            </td>
-        </tr>
-    @endforeach
-</tbody>
-           
-                
-</table>
-        </div>
+                    <tr class="resource-row" data-category="{{ $normalizedCat }}">
+                        <td><strong>{{ $resource->name }}</strong></td>
+                        <td style="font-size: 0.85rem; color: #555;">
+                            @if(count($specs) > 0)
+                                {!! implode(' <span style="color: #ddd; margin: 0 5px;">|</span> ', $specs) !!}
+                            @else
+                                <span style="color: #ccc; font-style: italic;">Non renseigné</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="status-pill status-{{ $resource->status }}">
+                                {{ $resource->status == 'available' ? 'Disponible' : 'Indisponible' }}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            @auth
+                                @if($resource->status == 'available')
+                                    <a href="{{ route('reservations.create', ['resource_id' => $resource->id]) }}" class="btn btn-success">RÉSERVER</a>
+                                @else
+                                    <span style="font-size: 0.75rem; color: #aaa;">OCCUPÉ</span>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-primary">SE CONNECTER</a>
+                            @endauth
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </main>
 
-<footer><p>© 2026 Projet DataCenter Pro</p></footer>
+<footer>
+    <p>© 2026 DataCenter Pro - Projet Licence Génie Logiciel</p>
+</footer>
 
 <script>
+    // --- VANILLA JS : FILTRAGE & TITRE DYNAMIQUE ---
     function filterResources(category, element) {
-        // 1. Normaliser la catégorie cliquée
+        // 1. Normalisation de la catégorie (ex: RÉSEAU -> reseau)
         const target = category.toLowerCase().replace(/[éèê]/g, 'e');
 
-        // 2. Gérer l'UI des cartes
-        document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+        // 2. Gestion visuelle des cartes (Active state)
+        document.querySelectorAll('.cat-card').forEach(card => card.classList.remove('active'));
         element.classList.add('active');
 
-        // 3. Afficher le tableau et masquer le message vide
-        document.getElementById('empty-message').style.display = 'none';
-        document.getElementById('table-wrapper').style.display = 'block';
+        // 3. Affichage du tableau et mise à jour du titre
+        document.getElementById('inventory-section').style.display = 'block';
         document.getElementById('table-title').innerText = "Liste des équipements : " + category;
 
-        // 4. Filtrer les lignes
+        // 4. Filtrage des lignes du tableau
         const rows = document.querySelectorAll('.resource-row');
         rows.forEach(row => {
             if (row.getAttribute('data-category').includes(target)) {
@@ -437,17 +248,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.classList.remove('visible');
             }
         });
+
+        // 5. Scroll fluide vers la liste
+        window.scrollTo({
+            top: document.getElementById('inventory-section').offsetTop - 100,
+            behavior: 'smooth'
+        });
     }
 
-    // Gestion des notifications
-    const btnNotif = document.getElementById('notifBtn');
-    if (btnNotif) {
-        btnNotif.addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.querySelector('.notif-dropdown').classList.toggle('show');
+    // --- VANILLA JS : NOTIFICATIONS ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const notifBtn = document.getElementById('notifBtn');
+        const dropdown = document.querySelector('.notif-dropdown');
+
+        if (notifBtn) {
+            notifBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+
+                // Mark as read AJAX (Framework-free fetch)
+                fetch("{{ route('notifications.markRead') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.querySelector('.notif-badge');
+                        if (badge) badge.style.display = 'none';
+                        document.getElementById('notif-count').innerText = '0 nouvelles';
+                    }
+                });
+            });
+        }
+
+        // Fermer le menu si on clique ailleurs
+        document.addEventListener('click', () => {
+            if(dropdown) dropdown.classList.remove('show');
         });
-        document.addEventListener('click', () => document.querySelector('.notif-dropdown').classList.remove('show'));
-    }
+    });
 </script>
 </body>
 </html>
