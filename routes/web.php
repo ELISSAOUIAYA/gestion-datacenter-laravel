@@ -11,7 +11,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\IncidentController;    
 use App\Models\Reservation;
 use App\Models\Resource;
-use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,13 +19,10 @@ use App\Http\Controllers\NotificationController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    // 1. Récupérer les réservations avec leurs relations
     $reservations = Reservation::with(['user', 'resource'])->get();
-
-    // 2. Récupérer les ressources : DISPONIBLES + TRIÉES + CHARGEMENT DE LA CATÉGORIE
-    $resources = Resource::with('category') // Eager loading pour éviter les ralentissements
-        ->where('status', 'available')     // Filtre : Uniquement les disponibles
-        ->orderBy('resource_category_id', 'asc') // Tri : 1, 2, 3, 4
+    $resources = Resource::with('category')
+        ->where('status', 'available')
+        ->orderBy('resource_category_id', 'asc')
         ->get();
 
     return view('welcome', compact('reservations', 'resources')); 
@@ -36,7 +33,6 @@ Route::get('/', function () {
 | 2. AUTHENTIFICATION (GUEST)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -49,23 +45,15 @@ Route::middleware('guest')->group(function () {
 | 3. ROUTES PROTÉGÉES (CONNEXION REQUISE)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth'])->group(function () {
 
-    Route::post('/logout', [LoginController::class,'logout'])->name('logout');
-    Route::redirect('/home', '/'); // Redirige /home vers l'accueil
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::redirect('/home', '/');
 
-    // --- LOGIQUE DE RÉSERVATION (Chorouk + Toi) ---
-    // On permet de passer l'ID de la ressource ou d'arriver sur un formulaire vide
-    Route::get('/reservations/create/{resource?}', [ReservationController::class, 'create'])->name('reservations.create');
-    Route::post('/valider-reservation', [ReservationController::class, 'store'])->name('reservations.store');
-    // --- LOGIQUE D'INCIDENTS ---
-    Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
-    Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
-    Route::delete('/reservations/{reservation}/delete', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    // --- NOTIFICATIONS ---
     Route::post('/mark-notifications-read', function () {
-    Auth::user()->notifications()->where('is_read', false)->update(['is_read' => true]);
-    return response()->json(['success' => true]);
+        Auth::user()->notifications()->where('is_read', false)->update(['is_read' => true]);
+        return response()->json(['success' => true]);
     })->name('notifications.markRead');
 
     /*
@@ -75,13 +63,9 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        
-        // Gestion des utilisateurs et maintenance
         Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
         Route::patch('/admin/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle');
         Route::patch('/admin/resources/{resource}/maintenance', [AdminController::class, 'toggleMaintenance'])->name('admin.resources.maintenance');
-        
-        // CRUD Complet
         Route::resource('resources', ResourceController::class);
     });
 
@@ -90,16 +74,14 @@ Route::middleware(['auth'])->group(function () {
     | TYPE 2 : RESPONSABLE TECHNIQUE
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:Responsable Technique'])->group(function(){
+    Route::middleware(['role:Responsable Technique'])->group(function() {
         Route::get('/responsable/dashboard', [TechController::class, 'dashboard'])->name('tech.dashboard');
         
-        // Validation des réservations
-        Route::put('/reservations/{reservation}/update', [ReservationController::class, 'update'])->name('reservations.update');
+        // Validation des réservations (Action Accepter/Refuser)
+      Route::put('/reservations/{reservation}/update', [ReservationController::class, 'update'])->name('reservations.update');
         
-        // Consultation incidents
-        Route::resource('incidents', IncidentController::class)->except(['create', 'store']);
+        // Gestion des incidents par le manager
         Route::delete('/manager/incidents/{incident}', [IncidentController::class, 'destroy'])->name('manager.incidents.destroy');
-       
     });
 
     /*
@@ -107,12 +89,21 @@ Route::middleware(['auth'])->group(function () {
     | TYPE 3 : UTILISATEUR INTERNE (Toi)
     |--------------------------------------------------------------------------
     */
-        Route::get('/historique', [UserController::class, 'historique'])->name('user.historique');
-        Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::middleware(['role:Utilisateur Interne'])->group(function() {
+        // Dashboard et Historique
+        Route::get('/user/dashboard', [ReservationController::class, 'index'])->name('user.dashboard');
+        Route::get('/user/historique', [ReservationController::class, 'historique'])->name('user.historique');
 
-    Route::middleware(['role:Utilisateur Interne'])->group(function(){
-        
-        
+        // Création de réservation
+        Route::get('/reservations/create/{resource?}', [ReservationController::class, 'create'])->name('reservations.create');
+        Route::post('/valider-reservation', [ReservationController::class, 'store'])->name('reservations.store');
+
+        // Signalement d'incidents
+        Route::get('/incidents/report/{resource_id}', [IncidentController::class, 'create'])->name('incidents.create');
+        Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
+
+        // Annulation d'une réservation (Delete)
+        Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
     });
 
 });

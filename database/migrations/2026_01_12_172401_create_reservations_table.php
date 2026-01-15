@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void {
+   public function up(): void {
     Schema::create('reservations', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->foreignId('resource_id')->constrained()->onDelete('cascade');
         $table->dateTime('start_date');
         $table->dateTime('end_date');
-        $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+        
+        // On définit l'ENUM avec les termes français exacts
+        $table->enum('status', ['EN ATTENTE', 'VALIDÉE', 'REFUSÉE'])->default('EN ATTENTE');
+        
         $table->timestamps();
     });
 }
-
     /**
      * Reverse the migrations.
      */

@@ -6,10 +6,10 @@ use App\Models\Reservation;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-    // Afficher le dashboard de l'utilisateur
     public function index()
     {
         $reservations = Reservation::where('user_id', Auth::id())
@@ -20,78 +20,97 @@ class ReservationController extends Controller
         return view('user.dashboard', compact('reservations'));
     }
 
-    // Afficher le formulaire de réservation
     public function create(Request $request)
     {
-        // On récupère l'ID de la ressource
-        $resourceId = $request->query('resource_id') ?? $request->resource;
+        $resourceId = $request->query('resource_id');
         $resource = Resource::findOrFail($resourceId);
 
-        return view('reservations.create', compact('resource'));
+        $existingReservations = Reservation::where('resource_id', $resourceId)
+            ->whereIn('status', ['VALIDÉE', 'EN ATTENTE']) 
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        return view('reservations.create', compact('resource', 'existingReservations'));
     }
 
-    // Enregistrer la réservation (Correction de l'erreur SQL)
     public function store(Request $request)
-{
-    // 1. On prépare les données en ajoutant manuellement l'ID de l'utilisateur connecté
-    $data = $request->all();
-    $data['user_id'] = auth()->id(); // C'est cette ligne qui manquait !
-    $data['status'] = 'pending'; // On s'assure que le statut est défini par défaut
-
-    // 2. Vérification des conflits (Détail n°1)
-    $conflit = Reservation::where('resource_id', $request->resource_id)
-        ->where(function ($query) use ($request) {
-            $query->whereBetween('start_date', [$request->start_date, $request->end_date])
-                  ->orWhereBetween('end_date', [$request->start_date, $request->end_date]);
-        })
-        ->exists();
-
-    if ($conflit) {
-        return back()->with('error', 'Cette machine est déjà réservée pour cette période !');
-    }
-
-    // 3. Création avec les données complétées
-    Reservation::create($data);
-
-    return redirect()->route('user.dashboard')->with('success', 'Réservation effectuée !');
-}
-
-         
-           public function update(Request $request, Reservation $reservation)
     {
-             $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
-    ]);
+        $request->validate([
+            'resource_id' => 'required|exists:resources,id',
+            'start_date'  => 'required|date|after:now',
+            'end_date'    => 'required|date|after:start_date',
+        ]);
 
-          $oldStatus = $reservation->status;
-          $reservation->update($request->all());
+        $overlap = Reservation::where('resource_id', $request->resource_id)
+            ->whereIn('status', ['VALIDÉE', 'EN ATTENTE'])
+            ->where(function ($query) use ($request) {
+                $query->where('start_date', '<', $request->end_date)
+                      ->where('end_date', '>', $request->start_date);
+            })->exists();
 
-          
-        if ($oldStatus !== $request->status) {
-        $title = "Mise à jour de votre réservation";
-        
-        if ($request->status == 'approved') {
-            $message = "Félicitations ! Votre réservation pour la ressource [{$reservation->resource->name}] a été approuvée.";
-        } elseif ($request->status == 'rejected') {
-            $message = "Désolé, votre demande pour [{$reservation->resource->name}] a été refusée.";
-            $reservation->resource->update(['status' => 'available']);
+        if ($overlap) {
+            return back()->withInput()->withErrors([
+                'overlap_error' => 'Cet équipement est déjà réservé ou en attente sur ce créneau.'
+            ]);
         }
 
-       
-        $reservation->user->addNotification($title, $message);
+        Reservation::create([
+            'user_id' => auth()->id(),
+            'resource_id' => $request->resource_id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'status' => 'EN ATTENTE'
+        ]);
+
+        return redirect()->route('user.dashboard')->with('success', 'Demande envoyée !');
     }
 
-    return back()->with('success', 'Statut mis à jour et utilisateur notifié.');
-}
+    public function update(Request $request, Reservation $reservation)
+    {
+        $request->validate([
+            'status' => 'required|in:VALIDÉE,REFUSÉE'
+        ]);
+
+        $oldStatus = $reservation->status;
+        
+        // 1. On met à jour en base de données
+        $reservation->update([
+            'status' => $request->status
+        ]);
+
+        // 2. LOGIQUE DE NOTIFICATION (Placée AVANT le return)
+        if ($oldStatus !== $request->status) {
+            $title = "Mise à jour de votre réservation";
+            $message = $request->status == 'VALIDÉE' 
+                ? "Félicitations ! Votre demande pour [{$reservation->resource->name}] a été validée."
+                : "Désolé, votre demande pour [{$reservation->resource->name}] a été refusée.";
+
+            if (method_exists($reservation->user, 'addNotification')) {
+                $reservation->user->addNotification($title, $message);
+            }
+        }
+
+        // 3. Enfin, on redirige
+        return back()->with('success', 'Le statut a été mis à jour et l\'utilisateur notifié.');
+    }
+
+    public function historique()
+    {
+        $reservations = Reservation::where('user_id', Auth::id())
+            ->with('resource')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('user.historique', compact('reservations'));
+    }
+
     public function destroy(Reservation $reservation)
-{
+    {
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->is_admin) {
+            return back()->with('error', 'Action non autorisée.');
+        }
 
-    if ($reservation->status === 'approved' || $reservation->status === 'pending') {
-        $reservation->resource->update(['status' => 'available']);
+        $reservation->delete();
+        return back()->with('success', 'Réservation supprimée.');
     }
-
-    $reservation->delete();
-
-    return back()->with('success', 'L\'opération a été supprimée et la ressource libérée.');
-}
 }
