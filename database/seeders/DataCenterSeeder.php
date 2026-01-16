@@ -39,7 +39,7 @@ class DataCenterSeeder extends Seeder
         User::create([
             'name' => 'Admin',
             'email' => 'admin@test.com',
-            'password' => Hash::make('admin123'),
+            'password' => Hash::make('admin12345'),
             'role_id' => $adminRole->id,
             'status' => 'active'
         ]);
@@ -47,7 +47,7 @@ class DataCenterSeeder extends Seeder
         User::create([
             'name' => 'Responsable technique',
             'email' => 'tech@test.com',
-            'password' => Hash::make('tech123'),
+            'password' => Hash::make('tech12345'),
             'role_id' => $techRole->id,
             'status' => 'active'
         ]);
@@ -55,7 +55,7 @@ class DataCenterSeeder extends Seeder
         User::create([
             'name' => 'Utilisateur Interne',
             'email' => 'user@test.com',
-            'password' => Hash::make('user123'),
+            'password' => Hash::make('user12345'),
             'role_id' => $userRole->id,
             'status' => 'active'
         ]);

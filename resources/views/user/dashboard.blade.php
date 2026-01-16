@@ -3,216 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Espace IT | DataCenter Pro</title>
+    <title>Mon Espace IT | Dark Pro</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
         :root {
-            --primary: #3498db;
-            --bg: #f4f7f6;
-            --white: #ffffff;
-            --dark: #2c3e50;
-            --text-muted: #7f8c8d;
-            --danger: #e74c3c;
-            --success: #27ae60;
-            --warning: #f1c40f;
-            --border: #dee2e6;
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.9);
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background-color: var(--bg); color: var(--dark); padding: 30px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        /* En-tête (Zone de Navigation) */
-        .header-section { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 30px; 
-            background: white; 
-            padding: 20px 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            padding: 20px;
+            background-image: radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.05), transparent 50%);
+            min-height: 100vh;
         }
 
-        .nav-group { display: flex; align-items: center; gap: 20px; }
-        .nav-link { color: var(--dark); text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.3s; }
+        .container { max-width: 1150px; margin: 0 auto; }
+
+        /* --- NAVIGATION --- */
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px; background: var(--card-bg); border-radius: 20px;
+            border: 1px solid var(--border); margin-bottom: 35px; backdrop-filter: blur(12px);
+            position: sticky; top: 20px; z-index: 1000;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; color: var(--primary); }
+        .nav-right { display: flex; align-items: center; gap: 25px; }
+        .nav-link { color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.3s; }
         .nav-link:hover { color: var(--primary); }
-        .nav-active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
-        .btn-logout { background: #fff5f5; color: var(--danger); border: 1px solid #fed7d7; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-logout:hover { background: var(--danger); color: white; }
-
-        /* Titre et Historique */
-        .title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .btn-history { background-color: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 14px; }
-
-        /* Carte de données */
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card-header-table { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        /* Tableau */
-        .res-table { width: 100%; border-collapse: collapse; }
-        .res-table th { text-align: left; padding: 12px; background: #f1f3f5; color: #495057; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; border-bottom: 2px solid var(--border); }
-        .res-table td { padding: 15px 12px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
-
-        /* Badges de Statut HAUTE VISIBILITÉ */
-        .badge { 
-            padding: 8px 15px; 
-            border-radius: 50px; 
-            font-size: 11px; 
-            font-weight: 800; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 6px; 
-            text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* Notification System */
+        .notif-container { position: relative; }
+        .notif-trigger { 
+            font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: 0.3s; position: relative;
+        }
+        .notif-trigger:hover { color: var(--primary); }
+        .badge-dot { 
+            position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; 
+            background: var(--danger); border-radius: 50%; border: 2px solid var(--bg);
         }
 
-        /* VERT ÉCLATANT pour Validée */
-        .status-validee { 
-            background-color: #2ecc71 !important; 
-            color: #ffffff !important; 
-            border: 2px solid #27ae60; 
+        .notif-dropdown {
+            position: absolute; top: 160%; right: 0; width: 320px; background: #0f172a;
+            border: 1px solid var(--border); border-radius: 15px; display: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden;
+        }
+        .notif-dropdown.active { display: block; animation: fadeIn 0.3s ease; }
+
+        .notif-header { padding: 15px; font-weight: 800; font-size: 0.8rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--primary); }
+        .notif-item { padding: 15px; border-bottom: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
+        .notif-item:hover { background: rgba(56, 189, 248, 0.05); }
+        .notif-item strong { display: block; color: var(--primary); font-size: 0.85rem; margin-bottom: 3px; }
+        .notif-item p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+        /* --- CARDS & TABLES --- */
+        .card { 
+            background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border);
+            padding: 30px; margin-bottom: 30px; backdrop-filter: blur(10px);
         }
 
-        /* JAUNE AMBRE pour En attente */
-        .status-en-attente { 
-            background-color: #f1c40f !important; 
-            color: #000000 !important; 
-            border: 2px solid #f39c12; 
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .card-title { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; font-weight: 700; }
 
-        /* ROUGE CORAIL pour Refusée */
-        .status-refusee { 
-            background-color: #e74c3c !important; 
-            color: #ffffff !important; 
-            border: 2px solid #c0392b; 
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 20px 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 
-        /* Boutons Actions */
-        .btn-incident { 
-            background: #fff1f2; 
-            color: #e11d48; 
-            padding: 8px 12px; 
-            border-radius: 6px; 
-            text-decoration: none; 
-            font-size: 11px; 
-            font-weight: bold; 
-            transition: 0.3s; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 5px;
-            border: 1px solid #fda4af;
-        }
-        .btn-incident:hover { background: #e11d48; color: white; }
-        
-        .btn-new { background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
-        .no-action { color: #adb5bd; font-size: 11px; font-style: italic; }
+        .status { padding: 6px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+        .status-valid { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        .btn { padding: 10px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.85rem; }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="user-dashboard">
-    <div class="header-section">
-        <div>
-            <h1 style="margin:0; font-size: 22px; color: var(--dark);">Mon Espace IT</h1>
-            <p style="margin:5px 0 0; color: var(--text-muted);">Bienvenue, <strong>{{ Auth::user()->name }}</strong></p>
+<div class="container">
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <i class='bx bxs-bolt-circle'></i> SMART RESERVATION
         </div>
-
-        <div class="nav-group">
-            <a href="{{ route('welcome') }}" class="nav-link">🏠 Accueil</a>
-            <a href="{{ route('user.dashboard') }}" class="nav-link nav-active">📊 Dashboard</a>
+        
+        <div class="nav-right">
+            <a href="{{ route('welcome') }}" class="nav-link">Accueil</a>
+            <a href="{{ route('user.dashboard') }}" class="nav-link" style="color: var(--primary);">Tableau de bord</a>
+            <a href="{{ route('user.historique') }}" class="nav-link"><i class='bx bx-history'></i> Historique</a>
             
-            <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+            <div class="notif-container" id="notifContainer">
+                <div class="notif-trigger" id="notifBtn">
+                    <i class='bx bxs-bell'></i>
+                    @if(auth()->user()->notifications()->where('is_read', false)->count() > 0)
+                        <span class="badge-dot" id="notifBadge"></span>
+                    @endif
+                </div>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">NOTIFICATIONS RÉCENTES</div>
+                    <div id="notifList">
+                        @forelse(auth()->user()->notifications()->latest()->take(5)->get() as $notif)
+                            <div class="notif-item" style="{{ !$notif->is_read ? 'border-left: 3px solid var(--primary); background: rgba(56, 189, 248, 0.02);' : '' }}">
+                                <strong>{{ $notif->title }}</strong>
+                                <p>{{ $notif->message }}</p>
+                                <small style="display:block; margin-top:5px; opacity:0.6; font-size:10px;">{{ $notif->created_at->diffForHumans() }}</small>
+                            </div>
+                        @empty
+                            <div class="notif-item" style="text-align: center;">Aucune notification</div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn-logout">DÉCONNEXION</button>
+                <button type="submit" class="btn btn-logout">
+                    <i class='bx bx-log-out'></i> Quitter
+                </button>
             </form>
         </div>
-    </div>
-
-    <div class="title-bar">
-        <h2 style="font-size: 20px;">Mes Réservations en cours</h2>
-        <a href="{{ route('user.historique') }}" class="btn-history">
-            <i class='bx bx-history'></i> Voir mon Historique
-        </a>
-    </div>
+    </nav>
 
     <div class="card">
-        <div class="card-header-table">
-            <h3 style="margin:0; font-size: 16px;">Suivi de mes demandes</h3>
-            <a href="{{ route('welcome') }}" class="btn-new">
-                <i class='bx bx-plus'></i> Nouvelle Réservation
+        <div class="card-header">
+            <div class="card-title">
+                <i class='bx bx-list-ul' style="color: var(--primary); font-size: 1.5rem;"></i>
+                Mes Réservations Actives
+            </div>
+            <a href="{{ route('welcome') }}" class="btn btn-primary">
+                <i class='bx bx-plus'></i> Nouveau Projet
             </a>
         </div>
 
-        <table class="res-table">
+        <table>
             <thead>
                 <tr>
-                    <th>Ressource</th>
+                    <th>Équipement</th>
                     <th>Période</th>
-                    <th>Justification</th>
                     <th>Statut</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($reservations as $res)
                 <tr>
-                    <td><strong>{{ $res->resource->name }}</strong></td>
-                    
                     <td>
-                        <span style="font-size: 13px;">
-                            <i class='bx bx-calendar-event' style="color: var(--primary);"></i> Du <strong>{{ \Carbon\Carbon::parse($res->start_date)->format('d/m/Y H:i') }}</strong><br>
-                            <i class='bx bx-calendar-check' style="color: var(--danger);"></i> au <strong>{{ \Carbon\Carbon::parse($res->end_date)->format('d/m/Y H:i') }}</strong>
+                        <div style="font-weight: 700;">{{ $res->resource->name }}</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem;">ID: #{{ $res->id }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.85rem;">
+                            {{ \Carbon\Carbon::parse($res->start_date)->format('d M, H:i') }} 
+                            <i class='bx bx-right-arrow-alt' style="color: var(--primary);"></i>
+                            {{ \Carbon\Carbon::parse($res->end_date)->format('d M, H:i') }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status {{ $res->status == 'VALIDÉE' ? 'status-valid' : 'status-pending' }}">
+                            <i class='bx {{ $res->status == "VALIDÉE" ? "bx-check-circle" : "bx-time-five" }}'></i>
+                            {{ $res->status }}
                         </span>
                     </td>
-
-                    <td><small>{{ $res->justification ?? 'Non spécifiée' }}</small></td>
-
-                    <td>
-                        @php 
-                            // Mapping manuel pour garantir la couleur même avec les accents
-                            $classeBadge = '';
-                            $icone = '';
-
-                            if ($res->status == 'VALIDÉE') {
-                                $classeBadge = 'status-validee';
-                                $icone = 'bx-check-circle';
-                            } elseif ($res->status == 'REFUSÉE') {
-                                $classeBadge = 'status-refusee';
-                                $icone = 'bx-x-circle';
-                            } else {
-                                $classeBadge = 'status-en-attente';
-                                $icone = 'bx-time-five';
-                            }
-                        @endphp
-                        
-                        <span class="badge {{ $classeBadge }}">
-                            <i class='bx {{ $icone }}'></i> {{ $res->status }}
-                        </span>
-                    </td>
-
                     <td>
                         @if($res->status == 'VALIDÉE')
-                            <a href="{{ route('incidents.create', ['resource_id' => $res->resource_id]) }}" class="btn-incident">
-                                <i class='bx bx-error-alt'></i> Signaler Incident
+                            <a href="{{ route('incidents.create', ['resource_id' => $res->resource_id]) }}" class="btn" style="border: 1px solid var(--border); color: var(--text-main);">
+                                <i class='bx bx-error'></i> Signaler
                             </a>
                         @else
-                            <span class="no-action">En attente de validation</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">En attente...</span>
                         @endif
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 60px; color: var(--text-muted);">
-                        <i class='bx bx-folder-open' style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.2;"></i>
-                        Vous n'avez aucune réservation enregistrée.
-                    </td>
-                </tr>
+                <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">Aucune réservation active.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    const notifBtn = document.getElementById('notifBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const badge = document.getElementById('notifBadge');
+
+    notifBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('active');
+
+        
+        if (notifDropdown.classList.contains('active') && badge) {
+            
+            fetch("{{ route('notifications.markRead') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    badge.style.display = 'none'; ا
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!notifDropdown.contains(e.target) && e.target !== notifBtn) {
+            notifDropdown.classList.remove('active');
+        }
+    });
+</script>
 
 </body>
 </html>

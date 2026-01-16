@@ -1,81 +1,239 @@
-@extends('layouts.app')
 
-@section('content')
 <style>
-    .admin-body { background: #f0f2f5; padding: 20px; font-family: sans-serif; }
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #3498db; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .section-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #666; }
-    .table td { padding: 12px; border-top: 1px solid #eee; vertical-align: middle; }
-    .btn-toggle { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; color: white; font-size: 11px; }
-    .btn-logout {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+    
+    :root {
+        --bg-body: #020617;
+        --bg-card: #0f172a;
+        --color-primary: #38bdf8;
+        --color-success: #10b981;
+        --color-danger: #ef4444;
+        --color-warning: #f59e0b;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --transition: all 0.3s ease;
+    }
 
-.btn-logout:hover {
-    background-color: #c0392b;
-}
+    .admin-container {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding: 40px 20px;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+  
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .header-flex h1 {
+        font-size: 1.8rem;
+        color: var(--color-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-logout {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--color-danger);
+        border: 1px solid var(--color-danger);
+        padding: 10px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-logout:hover {
+        background: var(--color-danger);
+        color: white;
+    }
+
+  
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        padding: 25px;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        border-color: var(--color-primary);
+        transform: translateY(-5px);
+    }
+
+    .stat-card h3 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-card p {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    
+    .section-card {
+        background: var(--bg-card);
+        border-radius: 24px;
+        border: 1px solid var(--border-color);
+        padding: 30px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+    }
+
+    .section-card h2 {
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--color-primary);
+    }
+
+    .pure-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .pure-table th {
+        padding: 15px;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .pure-table td {
+        padding: 20px 15px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+   
+    .pure-select {
+        background: var(--bg-body);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .badge {
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: var(--transition);
+    }
+
+    .btn-primary { background: var(--color-primary); color: #000; }
+    .btn-warning { background: var(--color-warning); color: #000; }
+
 </style>
 
-
-<form action="{{ route('logout') }}" method="POST" style="display: inline;">
-    @csrf
-    <button type="submit" class="btn-logout">
-        <i class='bx bx-log-out'></i> Déconnexion
-    </button>
-</form>
-
-
-<div class="admin-body">
-    <h1><i class='bx bxs-shield-quarter'></i> Administration Globale</h1>
+<div class="admin-container">
+    <div class="header-flex">
+        <h1><i class='bx bxs-dashboard'></i> Panel Admin IT</h1>
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn-logout">
+                <i class='bx bx-log-out-circle'></i> Déconnexion
+            </button>
+        </form>
+    </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><h3>{{ $stats['total_users'] }}</h3><p>Utilisateurs</p></div>
-        <div class="stat-card" style="border-color: #2ecc71;"><h3>{{ $stats['total_resources'] }}</h3><p>Catalogue IT</p></div>
-        <div class="stat-card" style="border-color: #f1c40f;"><h3>{{ $stats['occupied_rate'] }}%</h3><p>Taux d'occupation</p></div>
-        <div class="stat-card" style="border-color: #e74c3c;"><h3>{{ $stats['maintenance_count'] }}</h3><p>En Maintenance</p></div>
+        <div class="stat-card" style="border-top: 4px solid var(--color-primary);">
+            <h3>{{ $stats['total_users'] }}</h3>
+            <p>Utilisateurs</p>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--color-success);">
+            <h3>{{ $stats['total_resources'] }}</h3>
+            <p>Ressources IT</p>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--color-warning);">
+            <h3>{{ $stats['occupied_rate'] }}%</h3>
+            <p>Utilisation</p>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--color-danger);">
+            <h3>{{ $stats['maintenance_count'] }}</h3>
+            <p>Maintenance</p>
+        </div>
     </div>
 
     <div class="section-card">
-        <h3>Gestion des Comptes & Permissions</h3>
-        <table class="table">
-            <thead><tr><th>Utilisateur</th><th>Email</th><th>Rôle Actuel</th><th>Statut</th><th>Actions</th></tr></thead>
+        <h2><i class='bx bxs-user-detail'></i> Utilisateurs & Permissions</h2>
+        <table class="pure-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach($users as $user)
                 <tr>
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
+                    <td>
+                        <div style="font-weight: 700;">{{ $user->name }}</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem;">{{ $user->email }}</div>
+                    </td>
                     <td>
                         <form action="{{ route('admin.users.role', $user->id) }}" method="POST">
                             @csrf @method('PATCH')
-                            <select name="role_id" onchange="this.form.submit()" style="padding: 5px; border-radius: 4px;">
-                                <option value="">-- Assigner rôle --</option>
+                            <select name="role_id" onchange="this.form.submit()" class="pure-select">
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ ($user->role_id == $role->id) ? 'selected' : '' }}>{{ $role->name }}</option>
+                                    <option value="{{ $role->id }}" {{ $user->role_id == $role->id ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </form>
                     </td>
                     <td>
-                        <span style="color: {{ $user->status === 'active' ? 'green' : 'red' }}; font-weight: bold;">{{ ucfirst($user->status) }}</span>
+                        <span class="badge {{ $user->status === 'active' ? 'badge-success' : 'badge-danger' }}">
+                            {{ strtoupper($user->status) }}
+                        </span>
                     </td>
                     <td>
                         <form action="{{ route('admin.users.toggle', $user->id) }}" method="POST">
                             @csrf @method('PATCH')
-                            <button type="submit" class="btn-toggle" style="background: {{ $user->status === 'active' ? '#e74c3c' : '#27ae60' }}">
+                            <button type="submit" class="btn-action" style="background: {{ $user->status === 'active' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)' }}; color: {{ $user->status === 'active' ? 'var(--color-danger)' : 'var(--color-success)' }}; border: 1px solid currentColor;">
                                 {{ $user->status === 'active' ? 'Désactiver' : 'Activer' }}
                             </button>
                         </form>
@@ -87,20 +245,29 @@
     </div>
 
     <div class="section-card">
-        <h3>Maintenance & Catalogue des Ressources</h3>
-        <table class="table">
-            <thead><tr><th>Équipement</th><th>Catégorie</th><th>État</th><th>Actions</th></tr></thead>
+        <h2><i class='bx bxs-wrench'></i> Catalogue & Maintenance</h2>
+        <table class="pure-table">
+            <thead>
+                <tr>
+                    <th>Équipement</th>
+                    <th>État</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach($resources as $resource)
                 <tr>
-                    <td>{{ $resource->name }}</td>
-                    <td>{{ $resource->category->name ?? 'N/A' }}</td>
-                    <td><strong>{{ strtoupper($resource->status) }}</strong></td>
+                    <td style="font-weight: 700;">{{ $resource->name }}</td>
+                    <td>
+                        <span style="color: {{ $resource->status === 'maintenance' ? 'var(--color-warning)' : 'var(--color-success)' }}">
+                            ● {{ strtoupper($resource->status) }}
+                        </span>
+                    </td>
                     <td>
                         <form action="{{ route('admin.resources.maintenance', $resource->id) }}" method="POST">
                             @csrf @method('PATCH')
-                            <button type="submit" class="btn-toggle" style="background: #f39c12;">
-                                {{ $resource->status === 'maintenance' ? 'Remettre en ligne' : 'Planifier Maintenance' }}
+                            <button type="submit" class="btn-action btn-warning">
+                                <i class='bx bx-cog'></i> {{ $resource->status === 'maintenance' ? 'Remettre en ligne' : 'Maintenance' }}
                             </button>
                         </form>
                     </td>
@@ -110,4 +277,3 @@
         </table>
     </div>
 </div>
-@endsection
