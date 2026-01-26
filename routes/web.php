@@ -12,7 +12,7 @@ use App\Http\Controllers\IncidentController;
 use App\Models\Reservation;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Auth;
-
+Auth::routes();
 /*
 |--------------------------------------------------------------------------
 | 1. ROUTES PUBLIQUES

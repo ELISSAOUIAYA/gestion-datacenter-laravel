@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Mail;
 use App\Models\Incident;
 use App\Models\Resource;
 use Illuminate\Http\Request;
@@ -16,10 +16,19 @@ class IncidentController extends Controller
     $incidents = Incident::with(['user', 'resource'])->latest()->get();
     return view('manager.incidents.index', compact('incidents'));
 }
-public function destroy(Incident $incident)
+public function destroy($id)
 {
+    $incident = Incident::findOrFail($id);
     $incident->delete();
-    return back()->with('success', 'Le signalement a été supprimé par la modération.');
+
+    // On redirige avec un message de succès personnalisé
+    return back()->with('success', 'L\'incident a été supprimé et marqué comme résolu.');
+    $userEmail = $incident->user->email; 
+
+   Mail::raw("Votre incident concernant {$incident->titre} a été traité et résolu par l'administrateur.", function ($message) use ($userEmail) {
+    $message->to($userEmail)->subject('Incident Résolu - DataCenter Pro');
+});
+
 }
    // app/Http/Controllers/IncidentController.php
 

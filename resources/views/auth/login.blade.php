@@ -74,7 +74,7 @@
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">
                     <label class="form-check-label small text-white" for="remember" style="margin-left: 5px;">Rester connecté</label>
                 </div>
-                <a href="#" class="small text-decoration-none" style="color: #5e5ce6;">Mot de passe oublié?</a>
+                <a href="{{ url('/password/reset') }}" class="small text-decoration-none" style="color: #5e5ce6;">Mot de passe oublié?</a>
             </div>
 
             <button type="submit" class="btn btn-primary w-100" id="loginBtn" style="background-color: #5e5ce6; border: none; padding: 10px; color: white; cursor: pointer; border-radius: 4px;">

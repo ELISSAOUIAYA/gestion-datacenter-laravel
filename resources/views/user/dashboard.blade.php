@@ -128,7 +128,11 @@
             </form>
         </div>
     </div>
-
+    @if(session('success'))
+    <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+        <i class='bx bxs-check-circle'></i> {{ session('success') }}
+    </div>
+    @endif
     <div class="title-bar">
         <h2 style="font-size: 20px;">Mes Réservations en cours</h2>
         <a href="{{ route('user.historique') }}" class="btn-history">
