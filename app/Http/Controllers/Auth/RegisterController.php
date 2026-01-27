@@ -52,6 +52,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'user_type' => ['nullable', 'in:Ingénieur,Doctorant,Enseignant'],
         ]);
     }
 
@@ -67,7 +68,8 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role_id' => 3,       // <--- AJOUTE CETTE LIGNE (Utilisateur Interne)
+            'user_type' => $data['user_type'] ?? null,
+            'role_id' => 3,       // Utilisateur Interne
             'status' => 'active',
         ]);
     }

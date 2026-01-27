@@ -31,6 +31,16 @@
             </div>
 
             <div class="mb-3">
+                <label>Votre Type d'Utilisateur <span style="color: #999; font-size: 0.85rem;">(Optionnel - pour les utilisateurs internes)</span></label>
+                <select name="user_type" class="form-control">
+                    <option value="">-- Sélectionnez votre type (optionnel) --</option>
+                    <option value="Ingénieur">Ingénieur</option>
+                    <option value="Doctorant">Doctorant</option>
+                    <option value="Enseignant">Enseignant</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label>Mot de passe</label>
                 <div class="input-wrapper">
                     <input type="password" name="password" id="pass" class="form-control" required>

@@ -57,6 +57,7 @@ class DataCenterSeeder extends Seeder
             'email' => 'user@test.com',
             'password' => Hash::make('user123'),
             'role_id' => $userRole->id,
+            'user_type' => 'Ingénieur',
             'status' => 'active'
         ]);
 
@@ -67,6 +68,9 @@ class DataCenterSeeder extends Seeder
             'Stockage' => ['NetApp SAN', 'Synology NAS'],
             'Réseau' => ['Cisco Switch', 'Juniper Router']
         ];
+
+        $techUserId = $techRole->users()->first()->id ?? 2; // ID du responsable technique
+
 // 1. SERVEURS (ID: 1) - 15 équipements
     for ($i = 1; $i <= 15; $i++) {
         Resource::create([
@@ -77,7 +81,8 @@ class DataCenterSeeder extends Seeder
             'os' => 'Linux / Windows',
             'location' => 'Rack-' . rand(1, 20),
             'status' => 'available',
-            'bandwidth' => null, 'capacity' => null // Non compatibles
+            'bandwidth' => null, 'capacity' => null, // Non compatibles
+            'tech_manager_id' => ($i <= 5) ? $techUserId : null // Assigner les 5 premiers au responsable technique
         ]);
     }
 
@@ -92,7 +97,8 @@ class DataCenterSeeder extends Seeder
             'os' => 'Ubuntu / Debian',
             'location' => 'Virtual-Cluster',
             'status' => 'available',
-            'bandwidth' => null
+            'bandwidth' => null,
+            'tech_manager_id' => ($i <= 20) ? $techUserId : null // Assigner les 5 premiers au responsable technique
         ]);
     }
 
@@ -104,7 +110,8 @@ class DataCenterSeeder extends Seeder
             'capacity' => rand(1, 100) . ' To',
             'location' => 'Baie-Stockage-' . rand(1, 5),
             'status' => 'available',
-            'cpu' => null, 'ram' => null, 'bandwidth' => null, 'os' => null
+            'cpu' => null, 'ram' => null, 'bandwidth' => null, 'os' => null,
+            'tech_manager_id' => ($i <= 33) ? $techUserId : null // Assigner les 3 premiers au responsable technique
         ]);
     }
 
@@ -116,7 +123,8 @@ class DataCenterSeeder extends Seeder
             'bandwidth' => rand(1, 100) . ' Gbps',
             'location' => 'Rack-Network-' . rand(1, 10),
             'status' => 'available',
-            'cpu' => null, 'ram' => null, 'capacity' => null, 'os' => 'Cisco IOS'
+            'cpu' => null, 'ram' => null, 'capacity' => null, 'os' => 'Cisco IOS',
+            'tech_manager_id' => ($i <= 43) ? $techUserId : null // Assigner les 3 premiers au responsable technique
         ]);
     }
        

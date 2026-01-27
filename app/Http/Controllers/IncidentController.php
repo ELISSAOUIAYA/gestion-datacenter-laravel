@@ -19,15 +19,17 @@ class IncidentController extends Controller
 public function destroy($id)
 {
     $incident = Incident::findOrFail($id);
+    
+    // Envoyer email avant suppression
+    $userEmail = $incident->user->email; 
+    Mail::raw("Votre incident a été traité et résolu par l'administrateur.", function ($message) use ($userEmail) {
+        $message->to($userEmail)->subject('Incident Résolu - DataCenter Pro');
+    });
+
+    // Supprimer l'incident
     $incident->delete();
 
-    // On redirige avec un message de succès personnalisé
     return back()->with('success', 'L\'incident a été supprimé et marqué comme résolu.');
-    $userEmail = $incident->user->email; 
-
-   Mail::raw("Votre incident concernant {$incident->titre} a été traité et résolu par l'administrateur.", function ($message) use ($userEmail) {
-    $message->to($userEmail)->subject('Incident Résolu - DataCenter Pro');
-});
 
 }
    // app/Http/Controllers/IncidentController.php

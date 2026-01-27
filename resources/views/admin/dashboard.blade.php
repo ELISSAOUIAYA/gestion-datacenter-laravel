@@ -51,6 +51,7 @@
 
     <div class="section-card">
         <h3>Gestion des Comptes & Permissions</h3>
+
         <table class="table">
             <thead><tr><th>Utilisateur</th><th>Email</th><th>Rôle Actuel</th><th>Statut</th><th>Actions</th></tr></thead>
             <tbody>
@@ -97,10 +98,16 @@
                     <td>{{ $resource->category->name ?? 'N/A' }}</td>
                     <td><strong>{{ strtoupper($resource->status) }}</strong></td>
                     <td>
-                        <form action="{{ route('admin.resources.maintenance', $resource->id) }}" method="POST">
+                        <form action="{{ route('admin.resources.maintenance', $resource->id) }}" method="POST" style="display:inline;">
                             @csrf @method('PATCH')
                             <button type="submit" class="btn-toggle" style="background: #f39c12;">
                                 {{ $resource->status === 'maintenance' ? 'Remettre en ligne' : 'Planifier Maintenance' }}
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.resources.toggle', $resource->id) }}" method="POST" style="display:inline;">
+                            @csrf @method('POST')
+                            <button type="submit" class="btn-toggle" style="background: {{ $resource->is_active ? '#e74c3c' : '#27ae60' }};">
+                                {{ $resource->is_active ? 'Désactiver' : 'Activer' }}
                             </button>
                         </form>
                     </td>
@@ -108,6 +115,62 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+
+    <div class="section-card">
+        <h3>Gestion des Catégories de Ressources</h3>
+        <table class="table">
+            <thead><tr><th>Catégorie</th><th>Nombre de Ressources</th><th>Actions</th></tr></thead>
+            <tbody>
+                @foreach($categories as $category)
+                <tr>
+                    <td>{{ $category->name }}</td>
+                    <td>{{ $category->resources()->count() }}</td>
+                    <td>
+                        <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn-toggle" style="background: #3498db; text-decoration: none; display: inline-block;">Modifier</a>
+                        <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr ?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-toggle" style="background: #e74c3c;">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <div style="margin-top: 15px;">
+            <a href="{{ route('admin.categories.create') }}" class="btn-toggle" style="background: #27ae60; text-decoration: none; display: inline-block;">+ Ajouter Catégorie</a>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3>Gestion des Périodes de Maintenance Planifiée</h3>
+        <table class="table">
+            <thead><tr><th>Ressource</th><th>Début</th><th>Fin</th><th>Description</th><th>Actions</th></tr></thead>
+            <tbody>
+                @forelse($maintenances as $maintenance)
+                <tr>
+                    <td>{{ $maintenance->resource->name ?? 'N/A' }}</td>
+                    <td>{{ $maintenance->start_date->format('d/m/Y H:i') }}</td>
+                    <td>{{ $maintenance->end_date->format('d/m/Y H:i') }}</td>
+                    <td>{{ $maintenance->description ?? '-' }}</td>
+                    <td>
+                        <a href="{{ route('admin.maintenances.edit', $maintenance->id) }}" class="btn-toggle" style="background: #3498db; text-decoration: none; display: inline-block;">Modifier</a>
+                        <form action="{{ route('admin.maintenances.destroy', $maintenance->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr ?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-toggle" style="background: #e74c3c;">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#999;">Aucune maintenance planifiée</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+        <div style="margin-top: 15px;">
+            <a href="{{ route('admin.maintenances.create') }}" class="btn-toggle" style="background: #27ae60; text-decoration: none; display: inline-block;">+ Planifier Maintenance</a>
+        </div>
     </div>
 </div>
 @endsection

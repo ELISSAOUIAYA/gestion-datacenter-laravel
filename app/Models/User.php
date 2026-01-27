@@ -15,8 +15,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id', // On utilise l'ID de la table roles
+        'role_id',
         'status',
+        'is_active',
+        'user_type',
     ];
 
     protected $hidden = [
@@ -52,6 +54,14 @@ class User extends Authenticatable
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Relation vers les ressources supervisées (Pour le responsable technique)
+     */
+    public function supervises(): HasMany
+    {
+        return $this->hasMany(Resource::class, 'tech_manager_id');
     }
 
     /*

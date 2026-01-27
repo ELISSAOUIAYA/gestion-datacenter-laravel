@@ -1,11 +1,10 @@
 <?php
 
-
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // pour le helper auth() type-safe
+use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
@@ -18,16 +17,19 @@ class RoleMiddleware
      * @return mixed
      */
     public function handle(Request $request, Closure $next, $role)
-{
-    // On vérifie si l'utilisateur est connecté ET s'il a un rôle
-    if (!Auth::check() || !Auth::user()->role) {
-        abort(403, "Vous n'avez pas de rôle assigné.");
-    }
+    {
+        // On vérifie si l'utilisateur est connecté ET s'il a un rôle
+        if (!Auth::check() || !Auth::user()->role) {
+            abort(403, "Vous n'avez pas de rôle assigné.");
+        }
 
-    if (Auth::user()->role->name !== $role) {
-        abort(403, "Accès interdit");
-    }
+        // Accepter plusieurs rôles séparés par |
+        $allowedRoles = explode('|', $role);
+        
+        if (!in_array(Auth::user()->role->name, $allowedRoles)) {
+            abort(403, "Accès interdit");
+        }
 
-    return $next($request);
-}
+        return $next($request);
+    }
 }

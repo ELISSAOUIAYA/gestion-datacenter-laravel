@@ -68,22 +68,32 @@ class ReservationController extends Controller
     public function update(Request $request, Reservation $reservation)
     {
         $request->validate([
-            'status' => 'required|in:VALIDÉE,REFUSÉE'
+            'status' => 'required|in:VALIDÉE,REFUSÉE',
+            'rejection_reason' => 'nullable|string|required_if:status,REFUSÉE'
         ]);
 
         $oldStatus = $reservation->status;
         
         // 1. On met à jour en base de données
-        $reservation->update([
-            'status' => $request->status
-        ]);
+        $updateData = ['status' => $request->status];
+        
+        if ($request->status === 'REFUSÉE') {
+            $updateData['rejection_reason'] = $request->rejection_reason;
+        }
+        
+        if ($request->status === 'VALIDÉE') {
+            $updateData['approved_at'] = now();
+        }
+        
+        $reservation->update($updateData);
 
         // 2. LOGIQUE DE NOTIFICATION (Placée AVANT le return)
         if ($oldStatus !== $request->status) {
             $title = "Mise à jour de votre réservation";
             $message = $request->status == 'VALIDÉE' 
                 ? "Félicitations ! Votre demande pour [{$reservation->resource->name}] a été validée."
-                : "Désolé, votre demande pour [{$reservation->resource->name}] a été refusée.";
+                : "Désolé, votre demande pour [{$reservation->resource->name}] a été refusée." 
+                  . ($request->rejection_reason ? "\n\nMotif : " . $request->rejection_reason : "");
 
             if (method_exists($reservation->user, 'addNotification')) {
                 $reservation->user->addNotification($title, $message);

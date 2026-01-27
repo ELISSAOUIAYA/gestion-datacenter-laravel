@@ -15,7 +15,17 @@ class Reservation extends Model
         'resource_id', 
         'start_date', 
         'end_date', 
-        'status'
+        'status',
+        'justification',          // Justification de la demande
+        'rejection_reason',       // Motif du refus
+        'approved_at'             // Date d'approbation
+    ];
+
+    // Caster les dates en instances Carbon
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'approved_at' => 'datetime',
     ];
 
     // app/Models/Reservation.php

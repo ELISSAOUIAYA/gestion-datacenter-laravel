@@ -94,10 +94,7 @@
     <div class="container nav-content">
         <a href="/" class="logo"><i class='bx bxs-server'></i> DataCenter <span>Pro</span></a>
         <ul class="nav-links">
-            @guest
-                <li><a href="{{ route('login') }}">Connexion</a></li>
-                <li><a href="{{ route('register') }}" class="btn btn-primary">Inscription</a></li>
-            @else
+            @auth
                 <li class="notif-wrapper" id="notifBtn">
                     <div class="notif-trigger">
                         <i class='bx bxs-bell'></i>
@@ -122,13 +119,30 @@
                         </div>
                     </div>
                 </li>
-                <li><a href="{{ route('user.dashboard') }}"><strong>Dashboard</strong></a></li>
+                <li>
+                    @auth
+                        @if(Auth::user()->role && Auth::user()->role->name === 'Utilisateur Interne')
+                            <a href="{{ route('user.dashboard') }}"><strong>Espace personnel</strong></a>
+                        @elseif(Auth::user()->role && Auth::user()->role->name === 'Responsable Technique')
+                            <a href="{{ route('tech.dashboard') }}"><strong>Dashboard Technique</strong></a>
+                        @elseif(Auth::user()->role && Auth::user()->role->name === 'Admin')
+                            <a href="{{ route('admin.dashboard') }}"><strong>Dashboard Admin</strong></a>
+                        @else
+                            <a href="{{ route('user.dashboard') }}"><strong>Espace personnel</strong></a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}"><strong>Connexion requise</strong></a>
+                    @endauth
+                </li>
                 <li>
                     <form action="{{ route('logout') }}" method="POST">@csrf
                         <button type="submit" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; font-size:0.9rem;">Déconnexion</button>
                     </form>
                 </li>
-            @endguest
+            @else
+                <li><a href="{{ route('login') }}"><strong>Connexion</strong></a></li>
+                <li><a href="{{ route('register') }}"><strong>Inscription</strong></a></li>
+            @endauth
         </ul>
     </div>
 </nav>
@@ -205,10 +219,21 @@
                         </td>
                         <td style="text-align: center;">
                             @auth
-                                @if($resource->status == 'available')
-                                    <a href="{{ route('reservations.create', ['resource_id' => $resource->id]) }}" class="btn btn-success">RÉSERVER</a>
+                                @php
+                                    $isInterneUser = Auth::user()->role->name === 'Utilisateur Interne';
+                                    $isNormalUser = Auth::user()->role->name === 'Utilisateur Normal';
+                                    $isAuthorizedCategory = in_array($resource->resource_category_id, [2, 3, 4]); // VM, Stockage, Réseau
+                                    $canReserve = $isInterneUser || ($isNormalUser && $isAuthorizedCategory);
+                                @endphp
+                                
+                                @if($canReserve)
+                                    @if($resource->status == 'available')
+                                        <a href="{{ route('user.create-reservation-with-resource', $resource->id) }}" class="btn btn-success">RÉSERVER</a>
+                                    @else
+                                        <span style="font-size: 0.75rem; color: #aaa;">OCCUPÉ</span>
+                                    @endif
                                 @else
-                                    <span style="font-size: 0.75rem; color: #aaa;">OCCUPÉ</span>
+                                    <span style="font-size: 0.75rem; color: #999;">Non autorisé</span>
                                 @endif
                             @else
                                 <a href="{{ route('login') }}" class="btn btn-primary">SE CONNECTER</a>

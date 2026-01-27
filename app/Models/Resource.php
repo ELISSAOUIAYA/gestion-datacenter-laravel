@@ -18,13 +18,15 @@ class Resource extends Model
     protected $fillable = [
         'name',
         'resource_category_id', // Clé étrangère vers ResourceCategory
+        'tech_manager_id',       // Responsable technique assigné
         'cpu',
         'ram',
         'bandwidth',
         'capacity',
         'os',
         'location',
-        'status'
+        'status',
+        'is_active'              // Activation/Désactivation
     ];
 
     /*
@@ -32,6 +34,14 @@ class Resource extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * Relation avec le responsable technique (Une ressource peut être assignée à un responsable)
+     */
+    public function techManager()
+    {
+        return $this->belongsTo(User::class, 'tech_manager_id');
+    }
 
     /**
      * Relation avec la catégorie (Une ressource appartient à une catégorie)
