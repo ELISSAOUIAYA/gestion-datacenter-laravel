@@ -2,16 +2,6 @@
 
 Une application complète de gestion d'infrastructure IT avec système de réservation, gestion des incidents et contrôle d'accès par rôles.
 
-## 📺 Démonstration Vidéo
-Le fichier étant trop volumineux (612 Mo), vous pouvez visionner la démonstration complète ici :
-👉 **[LIEN VERS TA VIDÉO ICI]**
-
-## 🚀 Installation rapide
-1. Cloner le projet ou extraire le ZIP.
-2. Lancer la commande de configuration automatique :
-   ```bash
-   composer run setup
-   
 ## 📋 Vue rapide
 
 ```
