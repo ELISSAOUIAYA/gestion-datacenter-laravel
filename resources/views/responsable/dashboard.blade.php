@@ -218,9 +218,13 @@
             @forelse($reservations as $res)
                 <tr>
                     <td>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">{{ $res->user->name }}</div>
-                        <small style="color: var(--text-muted);">{{ $res->user->email }}</small>
-                    </td>
+    <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+        {{ $res->user->name ?? 'Utilisateur supprimé' }}
+    </div>
+    <small style="color: var(--text-muted);">
+        {{ $res->user->email ?? 'N/A' }}
+    </small>
+</td>
                     <td><strong style="color: var(--primary);">{{ $res->resource->name }}</strong></td>
                     <td style="font-size: 0.9rem; color: var(--text-muted);">
                         Du {{ \Carbon\Carbon::parse($res->start_date)->format('d/m H:i') }}<br>
