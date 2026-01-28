@@ -1,100 +1,229 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="background: #f5f7fa; min-height: 100vh; padding: 2rem;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1 style="margin: 0; color: #1a1a1a; display: flex; align-items: center; gap: 1rem;">
-                <i class='bx bxs-user-badge' style="font-size: 2rem; color: var(--primary);"></i>
-                Gestion des Utilisateurs
-            </h1>
-            <a href="{{ route('admin.dashboard') }}" style="background: #95a5a6; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: 600;">
-                ← Retour
-            </a>
-        </div>
+<style>
+    /* --- VARIABLES & GLOBAL --- */
+    :root {
+        --primary: #38bdf8;
+        --primary-dark: #0ea5e9;
+        --bg-body: #020617;
+        --bg-card: #0f172a;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: rgba(255, 255, 255, 0.08);
+        --success: #22c55e;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --stats-purple: #a855f7;
+    }
 
-        <!-- Filtres -->
-        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-            <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <input type="text" name="search" placeholder="Rechercher par nom ou email..." value="{{ request('search') }}" 
-                    style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem;">
-                
-                <select name="role" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem;">
-                    <option value="">Tous les rôles</option>
-                    @foreach($roles as $role)
-                    <option value="{{ $role->name }}" {{ request('role') === $role->name ? 'selected' : '' }}>
-                        {{ $role->name }}
-                    </option>
-                    @endforeach
-                </select>
+    .admin-body { 
+        background-color: var(--bg-body); 
+        color: var(--text-main); 
+        padding: 40px 20px; 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        position: relative; 
+        min-height: 100vh;
+    }
 
-                <select name="status" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem;">
-                    <option value="">Tous les status</option>
-                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
-                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
-                </select>
+    /* --- NAVIGATION HAUTE --- */
+    .header-actions {
+        position: absolute;
+        top: 40px;
+        right: 20px;
+        display: flex;
+        gap: 12px;
+        z-index: 1000;
+    }
 
-                <button type="submit" style="background: #3498db; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; padding: 0.75rem;">
-                    <i class='bx bx-search'></i> Filtrer
-                </button>
-            </form>
-        </div>
+    .btn-nav {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        text-transform: uppercase;
+        border: none;
+    }
+    .btn-dashboard { background-color: var(--stats-purple); color: white; }
+    .btn-home { background-color: var(--primary); color: #020617; }
+    .btn-logout { background-color: #1e293b; color: var(--danger); border: 1px solid var(--border); }
+    .btn-nav:hover { background-color: white; color: #020617; transform: translateY(-2px); }
 
-        <!-- Tableau -->
-        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #f8f9fa; border-bottom: 2px solid #ecf0f1;">
-                        <th style="padding: 1rem; text-align: left; color: #666; font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Nom</th>
-                        <th style="padding: 1rem; text-align: left; color: #666; font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Email</th>
-                        <th style="padding: 1rem; text-align: left; color: #666; font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Rôle</th>
-                        <th style="padding: 1rem; text-align: left; color: #666; font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Status</th>
-                        <th style="padding: 1rem; text-align: center; color: #666; font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($users as $user)
-                    <tr style="border-bottom: 1px solid #ecf0f1; transition: background 0.2s;">
-                        <td style="padding: 1rem; color: #333;">
-                            <strong>{{ $user->name }}</strong>
-                        </td>
-                        <td style="padding: 1rem; color: #666;">
-                            {{ $user->email }}
-                        </td>
-                        <td style="padding: 1rem;">
-                            <span style="display: inline-block; background: #e8f4f8; color: #3498db; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
-                                {{ $user->role->name ?? 'N/A' }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem;">
-                            <span style="display: inline-block; background: {{ $user->is_active ? '#d4edda' : '#f8d7da' }}; color: {{ $user->is_active ? '#155724' : '#721c24' }}; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
-                                {{ $user->is_active ? 'Actif' : 'Inactif' }}
-                            </span>
-                        </td>
-                        <td style="padding: 1rem; text-align: center;">
-                            <a href="{{ route('admin.users.show', $user) }}" style="display: inline-block; padding: 0.5rem 0.75rem; background: #3498db; color: white; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin: 0 0.25rem;">
-                                <i class='bx bx-show'></i> Voir
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" style="padding: 2rem; text-align: center; color: #999;">
-                            Aucun utilisateur trouvé
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    /* --- TITRE & SECTIONS --- */
+    h1 { font-weight: 800; letter-spacing: -1.5px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
+    h1 i { color: var(--primary); font-size: 2.5rem; }
 
-        <!-- Pagination -->
-        @if($users->hasPages())
-        <div style="margin-top: 2rem;">
-            {{ $users->links() }}
-        </div>
-        @endif
+    .section-card { 
+        background: var(--bg-card); 
+        padding: 30px; 
+        border-radius: 20px; 
+        margin-bottom: 30px; 
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
 
+    /* --- FILTRES (TEXTE & OPTIONS VISIBLES) --- */
+    .filter-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; }
+    
+    .filter-input, .filter-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        padding: 12px 15px;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+    /* Important : Fond des options pour qu'elles ne soient plus invisibles */
+    .filter-select option {
+        background-color: #0f172a; 
+        color: white;
+    }
+
+    .btn-filter {
+        background: var(--primary);
+        color: #020617;
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        transition: 0.3s;
+    }
+    .btn-filter:hover { background: white; transform: scale(1.02); }
+
+    /* --- TABLEAU --- */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { 
+        background: rgba(255, 255, 255, 0.02); 
+        padding: 18px; 
+        text-align: left; 
+        font-size: 0.7rem; 
+        color: var(--text-muted); 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        border-bottom: 1px solid var(--border);
+    }
+    .table td { padding: 20px 18px; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--text-main); }
+    .table tr:hover { background: rgba(56, 189, 248, 0.02); }
+
+    /* --- BADGES --- */
+    .badge { padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
+    .badge-role { background: rgba(56, 189, 248, 0.1); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .badge-active { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
+    .badge-inactive { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .btn-action { 
+        background: var(--primary); color: #020617; 
+        padding: 8px 16px; border-radius: 8px; 
+        text-decoration: none; font-weight: 800; 
+        font-size: 0.75rem; transition: 0.3s;
+    }
+    .btn-action:hover { background: white; }
+
+    /* Masquage des éléments inutiles */
+    .sidebar, .left-sidebar { display: none !important; }
+</style>
+
+<div class="admin-body">
+    <div class="header-actions">
+        <a href="{{ route('admin.dashboard') }}" class="btn-nav btn-dashboard">
+            <i class='bx bxs-dashboard'></i> Dashboard
+        </a>
+        <a href="{{ url('/') }}" class="btn-nav btn-home">
+            <i class='bx bx-home-alt-2'></i> Accueil
+        </a>
+        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" class="btn-nav btn-logout">
+                <i class='bx bx-power-off'></i> Déconnexion
+            </button>
+        </form>
     </div>
+
+    <h1><i class='bx bxs-user-badge'></i> Gestion des <span>Utilisateurs</span></h1>
+
+    <div class="section-card">
+        <form method="GET" class="filter-form">
+            <input type="text" name="search" class="filter-input" placeholder="Rechercher par nom ou email..." value="{{ request('search') }}">
+            
+            <select name="role" class="filter-select">
+                <option value="">Tous les rôles</option>
+                @foreach($roles as $role)
+                <option value="{{ $role->name }}" {{ request('role') === $role->name ? 'selected' : '' }}>
+                    {{ $role->name }}
+                </option>
+                @endforeach
+            </select>
+
+            <select name="status" class="filter-select">
+                <option value="">Tous les status</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
+            </select>
+
+            <button type="submit" class="btn-filter">
+                <i class='bx bx-search'></i> Filtrer
+            </button>
+        </form>
+    </div>
+
+    <div class="section-card" style="padding: 0; overflow: hidden;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Identité</th>
+                    <th>Coordonnées</th>
+                    <th>Rôle Système</th>
+                    <th>État</th>
+                    <th style="text-align: center;">Détails</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($users as $user)
+                <tr>
+                    <td><strong style="color: var(--primary);">{{ $user->name }}</strong></td>
+                    <td style="color: var(--text-muted); font-family: monospace;">{{ $user->email }}</td>
+                    <td>
+                        <span class="badge badge-role">
+                            {{ $user->role->name ?? 'N/A' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {{ $user->is_active ? 'badge-active' : 'badge-inactive' }}">
+                            {{ $user->is_active ? 'ACTIF' : 'INACTIF' }}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="{{ route('admin.users.show', $user) }}" class="btn-action">
+                            <i class='bx bx-show'></i> Voir profil 
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" style="padding: 4rem; text-align: center; color: var(--text-muted);">
+                        <i class='bx bx-ghost' style="font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.2;"></i>
+                        Aucun utilisateur trouvé.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    @if($users->hasPages())
+    <div style="margin-top: 2rem; display: flex; justify-content: center;">
+        {{ $users->links() }}
+    </div>
+    @endif
 </div>
 @endsection
