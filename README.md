@@ -2,12 +2,6 @@
 
 Une application complète de gestion d'infrastructure IT avec système de réservation, gestion des incidents et contrôle d'accès par rôles.
 
-## 📺 Vidéo de Démonstration
-Le fichier vidéo étant trop volumineux pour être joint directement (612 Mo), 
-vous pouvez le télécharger ou le visionner via le lien suivant :
-
-👉 **[COLLE TON LIEN ICI]**
-
 ## 📋 Vue rapide
 
 ```
