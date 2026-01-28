@@ -38,7 +38,6 @@ footer::before {
 
 .footer-grid {
     display: grid;
-    /* بدلت هادي لـ 3 ديال الأعمدة */
     grid-template-columns: 1.5fr 1fr 1fr; 
     gap: 40px;
     margin-bottom: 60px;

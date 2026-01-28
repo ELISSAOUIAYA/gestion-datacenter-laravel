@@ -17,31 +17,53 @@ class AdminDashboardController extends Controller
         $this->middleware('role:Admin');
     }
 
-    /**
+   /**
      * 1. TABLEAU DE BORD ADMINISTRATEUR
      */
     public function dashboard()
     {
+        // On récupère le nombre total de ressources une seule fois pour optimiser
+        $totalResourcesCount = Resource::count();
+
+        // LOGIQUE : On compte les ressources uniques qui possèdent au moins une réservation 'VALIDÉE'
+        // Cela permet d'afficher un taux d'occupation dès qu'un administrateur approuve une demande.
+        $occupiedResourcesCount = Resource::whereHas('reservations', function($query) {
+            $query->where('status', 'VALIDÉE');
+        })->count();
+
         // Statistiques globales pour les cartes du haut
         $stats = [
             'total_users' => User::count(),
-            'total_resources' => Resource::count(),
-            'occupied_rate' => round((Reservation::where('status', 'VALIDÉE')->count() / (Resource::count() ?: 1)) * 100),
+            'total_resources' => $totalResourcesCount,
+            // Calcul du taux : (Ressources réservées / Total ressources) * 100
+            'occupied_rate' => $totalResourcesCount > 0 
+                ? round(($occupiedResourcesCount / $totalResourcesCount) * 100) 
+                : 0,
             'maintenance_count' => Resource::where('status', 'maintenance')->count(),
         ];
         
-        // Récupération des données pour les tableaux
+        // Récupération des données pour les tableaux de la vue
         $users = User::with('role')->get();
         $resources = Resource::with('category')->get();
         $roles = Role::all();
         $categories = ResourceCategory::all();
-        $maintenances = MaintenancePeriod::where('start_date', '>=', now())
+        
+        // On récupère les maintenances à venir ou en cours
+        $maintenances = MaintenancePeriod::with('resource')
+            ->where('end_date', '>=', now())
             ->orderBy('start_date')
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'users', 'resources', 'roles', 'categories', 'maintenances'));
+        // Retourne la vue avec toutes les données compactées
+        return view('admin.dashboard', compact(
+            'stats', 
+            'users', 
+            'resources', 
+            'roles', 
+            'categories', 
+            'maintenances'
+        ));
     }
-
     /**
      * 2. GESTION UTILISATEURS - Liste
      */
@@ -281,50 +303,71 @@ class AdminDashboardController extends Controller
     }
 
     /**
-     * 4. STATISTIQUES GLOBALES
+     * 4. STATISTIQUES ADMINISTRATEUR
      */
-    public function statistics()
-    {
-        // Utilisateurs par rôle
-        $usersByRole = User::select('role_id')
-            ->with('role')
-            ->get()
-            ->groupBy('role_id')
-            ->map->count();
+    /**
+ * 4. STATISTIQUES GLOBALES (Version Logique 720h)
+ */
+public function statistics()
+{
+    // 1. Répartition des utilisateurs par rôle
+    $usersByRole = User::select('role_id')
+        ->with('role')
+        ->get()
+        ->groupBy('role_id')
+        ->map->count();
 
-        // Réservations par mois
-        $reservationsByMonth = Reservation::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->groupBy('month')
-            ->get();
+    // 2. Évolution des réservations par mois
+    $reservationsByMonth = Reservation::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->groupBy('month')
+        ->get();
 
-        // Taux d'occupation par ressource
-        $resourceOccupancy = Resource::with(['reservations'])
-            ->get()
-            ->map(function($r) {
-                $activeCount = $r->reservations->where('status', 'ACTIVE')->count();
-                $totalCount = $r->reservations->count();
-                return [
-                    'name' => $r->name,
-                    'occupancy' => $totalCount > 0 ? round(($activeCount / $totalCount) * 100) : 0
-                ];
-            });
+    // 3. CALCUL DE L'INTENSITÉ (Logique 720h)
+    // On récupère les ressources avec leurs réservations déjà filtrées sur 'VALIDÉE'
+    $resourceOccupancy = Resource::with(['reservations' => function($q) {
+        $q->where('status', 'VALIDÉE');
+    }])->get()->map(function($r) {
+        $totalHours = 0;
+        
+        // On compte le nombre de réservations validées pour l'affichage
+        $validatedCount = $r->reservations->count();
 
-        // Résumés rapides
-        $totalReservations = Reservation::count();
-        $activeReservations = Reservation::where('status', 'ACTIVE')->count();
-        $pendingReservations = Reservation::where('status', 'EN ATTENTE')->count();
-        $rejectedReservations = Reservation::where('status', 'REFUSÉE')->count();
+        foreach($r->reservations as $res) {
+            // Calcule la durée réelle entre le début et la fin
+            // Nécessite que start_date et end_date soient castés en datetime dans le modèle Reservation
+            $totalHours += $res->start_date->diffInHours($res->end_date);
+        }
 
-        return view('admin.statistics', compact(
-            'usersByRole',
-            'reservationsByMonth',
-            'resourceOccupancy',
-            'totalReservations',
-            'activeReservations',
-            'pendingReservations',
-            'rejectedReservations'
-        ));
-    }
+        // Calcul du % basé sur un mois standard de 720 heures (30 jours * 24h)
+        // min(100, ...) empêche de dépasser les 100% si la réservation est très longue
+        $occupancy = $totalHours > 0 ? min(100, round(($totalHours / 720) * 100)) : 0;
+
+        return [
+            'name' => $r->name,
+            'occupancy' => $occupancy,
+            'reservations_count' => $validatedCount
+        ];
+    });
+
+    // 4. Compteurs pour les cartes de résumé (Top Cards)
+    $totalReservations = Reservation::count();
+    $activeReservations = Reservation::where('status', 'VALIDÉE')->count();
+    $pendingReservations = Reservation::where('status', 'EN ATTENTE')->count();
+    $rejectedReservations = Reservation::where('status', 'REFUSÉE')->count();
+
+    // 5. Envoi des données à la vue
+    return view('admin.statistics', compact(
+        'usersByRole', 
+        'reservationsByMonth', 
+        'resourceOccupancy',
+        'totalReservations', 
+        'activeReservations', 
+        'pendingReservations', 
+        'rejectedReservations'
+    ));
+}
+
+
 
     /**
      * 5. GESTION MAINTENANCES PLANIFIÉES - Liste

@@ -5,29 +5,36 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Resource;
 use App\Models\Role;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function dashboard()
-    {
-        // 1. Statistiques pour les cartes du haut
-        $totalResources = Resource::count();
-        $stats = [
-            'total_users' => User::count(),
-            'total_resources' => $totalResources,
-            'occupied_rate' => $totalResources > 0 ? round((Resource::where('status', 'occupied')->count() / $totalResources) * 100) : 0,
-            'maintenance_count' => Resource::where('status', 'maintenance')->count(),
-        ];
+   public function dashboard()
+{
+    // 1. Statistiques globales
+    $totalResources = Resource::count();
 
-        // 2. Récupération des données pour les tableaux
-        $users = User::with('role')->get();
-        $resources = Resource::with('category')->get();
-        $roles = Role::all();
+    // On compte toutes les ressources qui ont AU MOINS une réservation validée
+    // On ignore l'heure pour être sûr que ça s'affiche même si les fuseaux horaires divergent
+    $occupiedResourcesCount = Resource::whereHas('reservations', function($query) {
+        $query->where('status', 'VALIDÉE');
+    })->count();
+   
+    $stats = [
+        'total_users' => User::count(),
+        'total_resources' => $totalResources,
+        'occupied_rate' => $totalResources > 0 ? round(($occupiedResourcesCount / $totalResources) * 100) : 0,
+        'maintenance_count' => Resource::where('status', 'maintenance')->count(),
+    ];
 
-        return view('admin.dashboard', compact('stats', 'users', 'resources', 'roles'));
-    }
+    // 2. Données pour les tableaux
+    $users = User::with('role')->get();
+    $resources = Resource::with('category')->get();
+    $roles = Role::all();
 
+    return view('admin.dashboard', compact('stats', 'users', 'resources', 'roles'));
+}
     // Gérer le rôle d'un utilisateur (ex: pour corriger le compte d'AYA)
     public function updateRole(Request $request, User $user)
     {

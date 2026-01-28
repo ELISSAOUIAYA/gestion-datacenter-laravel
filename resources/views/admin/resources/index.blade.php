@@ -185,7 +185,6 @@
 
     <div class="management-nav-centered">
         <a href="{{ route('admin.statistics') }}" class="btn-nav btn-stats"><i class='bx bx-bar-chart-alt-2'></i> Statistiques</a> 
-        <a href="{{ route('admin.account-requests.index') }}" class="btn-nav btn-demandes"><i class='bx bxs-user-check'></i> Demandes</a>
         <a href="{{ route('admin.users.index') }}" class="btn-nav btn-users"><i class='bx bx-group'></i> Utilisateurs</a>
         <a href="{{ route('admin.resources.index') }}" class="btn-nav btn-resources-nav"><i class='bx bxs-server'></i> Ressources</a>
         <a href="{{ route('admin.categories.index') }}" class="btn-nav btn-categories"><i class='bx bx-folder'></i> Catégories</a>
