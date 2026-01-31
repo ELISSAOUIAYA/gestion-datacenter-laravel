@@ -193,3 +193,5 @@ Pour plus d'informations, consultez le [rapport complet](docs/RAPPORT.md).
 **Version** : 1.0  
 **Date** : Janvier 2026  
 **Statut** : ✅ Complet et fonctionnel
+**LIEN**: https://youtu.be/ghKDUq0MMcI?feature=shared
+
